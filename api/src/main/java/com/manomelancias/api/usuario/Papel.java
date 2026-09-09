@@ -1,4 +1,6 @@
 package com.manomelancias.api.usuario;
 
-public class Papel {
+public enum Papel {
+    ADMIN,
+    OPERADOR
 }

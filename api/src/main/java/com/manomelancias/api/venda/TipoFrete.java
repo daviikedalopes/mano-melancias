@@ -1,4 +1,6 @@
 package com.manomelancias.api.venda;
 
-public class TipoFrete {
+public enum TipoFrete {
+    NEGOCIADO,
+    POR_KG
 }

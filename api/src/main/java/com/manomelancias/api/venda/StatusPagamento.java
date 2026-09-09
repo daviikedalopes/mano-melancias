@@ -1,4 +1,7 @@
 package com.manomelancias.api.venda;
 
-public class StatusPagamento {
+public enum StatusPagamento {
+    PENDENTE,
+    PAGO_PARCIAL,
+    PAGO
 }
