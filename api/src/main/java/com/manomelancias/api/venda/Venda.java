@@ -64,6 +64,7 @@ public class Venda {
     @JoinColumn(name = "veiculo_id", nullable = false)
     private Veiculo veiculo;
 
+    // Peso bruto = peso da tara (veículo) + peso da palha + peso das frutas
     @Column(name = "peso_bruto", nullable = false, precision = 10, scale = 2)
     private BigDecimal pesoBruto;
 
