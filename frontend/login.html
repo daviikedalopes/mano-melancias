@@ -1,10 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar · Mano Melancias</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
+  <div class="login-screen">
+    <div class="login-card">
+      <div class="login-card__brand">
+        <img src="assets/img/logo_mano_melancias.png" alt="Mano Melancias">
+        <h1>Mano Melancias</h1>
+        <p>Gestão de vendas de melancia</p>
+      </div>
 
+      <div class="login-error" id="login-error" hidden></div>
+
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input class="input" type="email" id="email" name="email" placeholder="voce@manomelancias.com.br" required autofocus autocomplete="username">
+        </div>
+        <div class="field">
+          <label for="senha">Senha</label>
+          <input class="input" type="password" id="senha" name="senha" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="login-submit" style="margin-top:6px;">Entrar</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/toast.js"></script>
+  <script src="assets/js/pages/login.js"></script>
 </body>
 </html>

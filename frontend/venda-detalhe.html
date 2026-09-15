@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Venda · Mano Melancias</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <div class="auth-veil" id="auth-veil">Carregando…</div>
+  <div class="sidebar-scrim" data-sidebar-scrim></div>
+
+  <div class="app-shell" data-auth-gate>
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <img src="assets/img/logo_mano_melancias.png" alt="">
+        <div class="sidebar__brand-text">Mano Melancias<span>Gestão de vendas</span></div>
+      </div>
+      <a href="venda-form.html" class="sidebar__cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg>Nova venda</a>
+      <nav class="sidebar__nav">
+        <a href="index.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1v-9"/></svg>Painel</a>
+        <a href="vendas.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v17H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Vendas</a>
+        <a href="clientes.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V7l8-4 8 4v14"/><path d="M9 21v-6h6v6M9 11h.01M15 11h.01M9 15h.01M15 15h.01"/></svg>Clientes</a>
+        <a href="produtores.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-9"/><path d="M12 13c0-4-3-7-7-7 0 4 3 7 7 7Z"/><path d="M12 13c0-5 3-9 8-9 0 5-3 9-8 9Z"/></svg>Produtores</a>
+        <a href="motoristas.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>Motoristas</a>
+        <a href="veiculos.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16V9a1 1 0 0 1 1-1h9l4 4h3a1 1 0 0 1 1 1v3"/><path d="M3 16h1m16 0h1M3 16a2 2 0 1 0 4 0M17 16a2 2 0 1 0 4 0M7 16h6"/></svg>Veículos</a>
+        <a href="relatorios.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M11 20V4M18 20v-7"/></svg>Relatórios</a>
+        <a href="usuarios.html" class="sidebar__link" data-requires-admin><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M2 21c0-3.3 3-6 7-6s7 2.7 7 6"/><path d="M16 4.2a3 3 0 0 1 0 5.6M20 21c0-2.7-1.8-5-4.3-5.8"/></svg>Usuários</a>
+      </nav>
+      <div class="sidebar__footer">
+        <div class="sidebar__user">
+          <div class="sidebar__user-email" data-user-email></div>
+          <span class="sidebar__user-papel" data-user-papel></span>
+        </div>
+        <button type="button" class="sidebar__logout" data-logout><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>Sair</button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="row">
+          <button type="button" class="menu-toggle" data-menu-toggle aria-label="Abrir menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="20" height="20"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+          <div class="topbar__title">
+            <div>
+              <h1>Detalhe da venda</h1>
+              <div class="topbar__subtitle" id="page-subtitle">Carregando...</div>
+            </div>
+          </div>
+        </div>
+        <div class="topbar__actions">
+          <a href="vendas.html" class="btn btn-secondary">Voltar</a>
+          <button type="button" class="btn btn-secondary" id="btn-pdf">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"/></svg>
+            Recibo em PDF
+          </button>
+          <a href="#" class="btn btn-primary" id="btn-edit">Editar</a>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="stack" style="max-width: 900px;">
+          <div class="ticket" id="ticket" hidden>
+            <div class="ticket__band">
+              <div>
+                <div class="ticket__number-label">Venda nº</div>
+                <div class="ticket__number" id="t-numero">—</div>
+              </div>
+              <div class="ticket__date">
+                <div class="ticket__date-label">Data</div>
+                <div class="ticket__date-value" id="t-data">—</div>
+              </div>
+            </div>
+
+            <div class="ticket__body">
+              <div class="row row--wrap" style="gap:8px;">
+                <span class="badge" id="t-status"></span>
+                <span class="text-soft" id="t-criado-por" style="font-size:12.5px;"></span>
+              </div>
+
+              <div>
+                <div class="ticket__section-title">Destinatário</div>
+                <div class="ticket__grid">
+                  <div><div class="ticket__item-label">Cliente</div><div class="ticket__item-value" id="t-cliente-nome">—</div></div>
+                  <div><div class="ticket__item-label">Município</div><div class="ticket__item-value" id="t-cliente-municipio">—</div></div>
+                  <div><div class="ticket__item-label">Estado</div><div class="ticket__item-value" id="t-cliente-estado">—</div></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="ticket__section-title">Peso e frutas</div>
+                <div class="ticket__grid">
+                  <div><div class="ticket__item-label">Peso bruto</div><div class="ticket__item-value ticket__item-value--num" id="t-peso-bruto">—</div></div>
+                  <div><div class="ticket__item-label">Desc. tara</div><div class="ticket__item-value ticket__item-value--num" id="t-desc-tara">—</div></div>
+                  <div><div class="ticket__item-label">Desc. palha</div><div class="ticket__item-value ticket__item-value--num" id="t-desc-palha">—</div></div>
+                  <div><div class="ticket__item-label">Peso líquido</div><div class="ticket__item-value ticket__item-value--num ticket__item-value--lg" id="t-peso-liquido">—</div></div>
+                  <div><div class="ticket__item-label">Total de frutas</div><div class="ticket__item-value ticket__item-value--num" id="t-total-frutas">—</div></div>
+                  <div><div class="ticket__item-label">Média por fruta</div><div class="ticket__item-value ticket__item-value--num" id="t-media-peso">—</div></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="ticket__section-title">Financeiro</div>
+                <div class="ticket__grid" style="margin-bottom:16px;">
+                  <div><div class="ticket__item-label">Preço por kg</div><div class="ticket__item-value ticket__item-value--num" id="t-preco-kg">—</div></div>
+                  <div><div class="ticket__item-label">Tipo de frete</div><div class="ticket__item-value" id="t-tipo-frete">—</div></div>
+                  <div><div class="ticket__item-label">Vencimento</div><div class="ticket__item-value" id="t-vencimento">—</div></div>
+                  <div><div class="ticket__item-label">Nota fiscal</div><div class="ticket__item-value" id="t-nf">—</div></div>
+                </div>
+                <div class="ticket__totals">
+                  <div class="ticket__total-row"><span>Valor da mercadoria</span><span id="t-valor-mercadoria">—</span></div>
+                  <div class="ticket__total-row"><span>Valor do frete</span><span id="t-valor-frete">—</span></div>
+                  <div class="ticket__total-row ticket__total-row--final"><span>Restante a pagar</span><span id="t-restante">—</span></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="ticket__section-title">Logística</div>
+                <div class="ticket__grid">
+                  <div><div class="ticket__item-label">Motorista</div><div class="ticket__item-value" id="t-motorista-nome">—</div></div>
+                  <div><div class="ticket__item-label">CPF</div><div class="ticket__item-value ticket__item-value--num" id="t-motorista-cpf">—</div></div>
+                  <div><div class="ticket__item-label">Telefone</div><div class="ticket__item-value" id="t-motorista-telefone">—</div></div>
+                  <div><div class="ticket__item-label">Placa</div><div class="ticket__item-value ticket__item-value--num" id="t-veiculo-placa">—</div></div>
+                  <div><div class="ticket__item-label">Cidade do veículo</div><div class="ticket__item-value" id="t-veiculo-cidade">—</div></div>
+                  <div><div class="ticket__item-label">Produtor</div><div class="ticket__item-value" id="t-produtor-nome">—</div></div>
+                </div>
+              </div>
+
+              <div id="section-obs" hidden>
+                <div class="ticket__section-title">Observações</div>
+                <p id="t-observacoes" style="font-size:14.5px; line-height:1.6;"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="row" style="justify-content:flex-end;">
+            <button type="button" class="btn btn-danger" id="btn-excluir">Excluir venda</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/format.js"></script>
+  <script src="assets/js/toast.js"></script>
+  <script src="assets/js/shell.js"></script>
+  <script src="assets/js/pages/venda-detalhe.js"></script>
+</body>
+</html>

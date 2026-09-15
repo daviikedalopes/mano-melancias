@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel · Mano Melancias</title>
+  <title>Usuários · Mano Melancias</title>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
@@ -16,12 +16,7 @@
         <img src="assets/img/logo_mano_melancias.png" alt="">
         <div class="sidebar__brand-text">Mano Melancias<span>Gestão de vendas</span></div>
       </div>
-
-      <a href="venda-form.html" class="sidebar__cta">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg>
-        Nova venda
-      </a>
-
+      <a href="venda-form.html" class="sidebar__cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg>Nova venda</a>
       <nav class="sidebar__nav">
         <a href="index.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1v-9"/></svg>Painel</a>
         <a href="vendas.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v17H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Vendas</a>
@@ -32,16 +27,12 @@
         <a href="relatorios.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M11 20V4M18 20v-7"/></svg>Relatórios</a>
         <a href="usuarios.html" class="sidebar__link" data-requires-admin><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M2 21c0-3.3 3-6 7-6s7 2.7 7 6"/><path d="M16 4.2a3 3 0 0 1 0 5.6M20 21c0-2.7-1.8-5-4.3-5.8"/></svg>Usuários</a>
       </nav>
-
       <div class="sidebar__footer">
         <div class="sidebar__user">
           <div class="sidebar__user-email" data-user-email></div>
           <span class="sidebar__user-papel" data-user-papel></span>
         </div>
-        <button type="button" class="sidebar__logout" data-logout>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
-          Sair
-        </button>
+        <button type="button" class="sidebar__logout" data-logout><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>Sair</button>
       </div>
     </aside>
 
@@ -51,87 +42,76 @@
           <button type="button" class="menu-toggle" data-menu-toggle aria-label="Abrir menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="20" height="20"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
           <div class="topbar__title">
             <div>
-              <h1>Painel</h1>
-              <div class="topbar__subtitle">Visão geral das vendas deste mês</div>
+              <h1>Usuários</h1>
+              <div class="topbar__subtitle">Acesso interno ao sistema (somente administradores)</div>
             </div>
           </div>
         </div>
         <div class="topbar__actions">
-          <a href="venda-form.html" class="btn btn-primary">
+          <button type="button" class="btn btn-primary" id="btn-new">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-            Nova venda
-          </a>
+            Novo usuário
+          </button>
         </div>
       </header>
 
       <main class="content">
-        <div class="stack">
-          <div class="grid-4">
-            <div class="stat-tile">
-              <div class="stat-tile__label">Vendas no mês</div>
-              <div class="stat-tile__value num" id="stat-qtd-vendas">—</div>
+        <div class="card">
+          <div class="card__body card__body--tight">
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th></tr></thead>
+                <tbody id="usuarios-body"></tbody>
+              </table>
             </div>
-            <div class="stat-tile stat-tile--wine">
-              <div class="stat-tile__label">Mercadoria vendida</div>
-              <div class="stat-tile__value num" id="stat-total-mercadoria">—</div>
-            </div>
-            <div class="stat-tile stat-tile--gold">
-              <div class="stat-tile__label">Frete no mês</div>
-              <div class="stat-tile__value num" id="stat-total-frete">—</div>
-            </div>
-            <div class="stat-tile stat-tile--flesh">
-              <div class="stat-tile__label">A receber (total)</div>
-              <div class="stat-tile__value num" id="stat-a-receber">—</div>
-              <div class="stat-tile__meta" id="stat-a-receber-meta"></div>
-            </div>
-          </div>
-
-          <div class="grid-2">
-            <div class="card">
-              <div class="card__header">
-                <h2>Últimas vendas</h2>
-                <a href="vendas.html" class="btn btn-ghost btn-sm">Ver todas</a>
-              </div>
-              <div class="card__body card__body--tight">
-                <div class="table-wrap">
-                  <table class="table">
-                    <thead>
-                      <tr><th>Venda</th><th>Cliente</th><th class="num-col">Peso líq.</th><th class="num-col">Mercadoria</th><th>Status</th></tr>
-                    </thead>
-                    <tbody id="ultimas-vendas-body"></tbody>
-                  </table>
-                </div>
-                <div class="empty-state" id="ultimas-vendas-empty" hidden>
-                  <h3>Nenhuma venda lançada ainda</h3>
-                  <p>Registre o primeiro carregamento para começar.</p>
-                  <a href="venda-form.html" class="btn btn-primary btn-sm">Lançar venda</a>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card__header">
-                <h2>Contas a vencer</h2>
-                <a href="relatorios.html" class="btn btn-ghost btn-sm">Ver relatório</a>
-              </div>
-              <div class="card__body card__body--tight">
-                <div class="table-wrap">
-                  <table class="table">
-                    <thead>
-                      <tr><th>Venda</th><th>Cliente</th><th class="num-col">Restante</th><th>Vencimento</th></tr>
-                    </thead>
-                    <tbody id="contas-vencer-body"></tbody>
-                  </table>
-                </div>
-                <div class="empty-state" id="contas-vencer-empty" hidden>
-                  <h3>Nada pendente</h3>
-                  <p>Todas as vendas lançadas já foram quitadas.</p>
-                </div>
-              </div>
+            <div class="empty-state" id="usuarios-empty" hidden>
+              <h3>Nenhum usuário cadastrado ainda</h3>
+              <p>Crie o primeiro acesso ao sistema.</p>
+              <button type="button" class="btn btn-primary btn-sm" id="empty-new">Novo usuário</button>
             </div>
           </div>
         </div>
       </main>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal__header">
+        <h2>Novo usuário</h2>
+        <button type="button" class="modal__close" data-modal-close aria-label="Fechar">&times;</button>
+      </div>
+      <form id="entity-form" novalidate>
+        <div class="modal__body">
+          <div class="field">
+            <label for="m-nome">Nome</label>
+            <input class="input" type="text" id="m-nome" required>
+            <span class="error-msg" data-field-error-for="nome" hidden></span>
+          </div>
+          <div class="field">
+            <label for="m-email">E-mail</label>
+            <input class="input" type="email" id="m-email" placeholder="pessoa@manomelancias.com.br" required>
+            <span class="error-msg" data-field-error-for="email" hidden></span>
+          </div>
+          <div class="field">
+            <label for="m-senha">Senha provisória</label>
+            <input class="input" type="password" id="m-senha" placeholder="Mínimo 6 caracteres" required>
+            <span class="error-msg" data-field-error-for="senha" hidden></span>
+          </div>
+          <div class="field">
+            <label for="m-papel">Papel</label>
+            <select class="select" id="m-papel" required>
+              <option value="OPERADOR">Operador</option>
+              <option value="ADMIN">Administrador</option>
+            </select>
+            <span class="hint">Administradores também podem gerenciar usuários.</span>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn-secondary" data-modal-close>Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="form-submit">Criar usuário</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -141,6 +121,6 @@
   <script src="assets/js/format.js"></script>
   <script src="assets/js/toast.js"></script>
   <script src="assets/js/shell.js"></script>
-  <script src="assets/js/pages/dashboard.js"></script>
+  <script src="assets/js/pages/usuarios.js"></script>
 </body>
 </html>

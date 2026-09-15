@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nova venda · Mano Melancias</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <div class="auth-veil" id="auth-veil">Carregando…</div>
+  <div class="sidebar-scrim" data-sidebar-scrim></div>
+
+  <div class="app-shell" data-auth-gate>
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <img src="assets/img/logo_mano_melancias.png" alt="">
+        <div class="sidebar__brand-text">Mano Melancias<span>Gestão de vendas</span></div>
+      </div>
+      <a href="venda-form.html" class="sidebar__cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg>Nova venda</a>
+      <nav class="sidebar__nav">
+        <a href="index.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1v-9"/></svg>Painel</a>
+        <a href="vendas.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v17H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Vendas</a>
+        <a href="clientes.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V7l8-4 8 4v14"/><path d="M9 21v-6h6v6M9 11h.01M15 11h.01M9 15h.01M15 15h.01"/></svg>Clientes</a>
+        <a href="produtores.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-9"/><path d="M12 13c0-4-3-7-7-7 0 4 3 7 7 7Z"/><path d="M12 13c0-5 3-9 8-9 0 5-3 9-8 9Z"/></svg>Produtores</a>
+        <a href="motoristas.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>Motoristas</a>
+        <a href="veiculos.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16V9a1 1 0 0 1 1-1h9l4 4h3a1 1 0 0 1 1 1v3"/><path d="M3 16h1m16 0h1M3 16a2 2 0 1 0 4 0M17 16a2 2 0 1 0 4 0M7 16h6"/></svg>Veículos</a>
+        <a href="relatorios.html" class="sidebar__link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M11 20V4M18 20v-7"/></svg>Relatórios</a>
+        <a href="usuarios.html" class="sidebar__link" data-requires-admin><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M2 21c0-3.3 3-6 7-6s7 2.7 7 6"/><path d="M16 4.2a3 3 0 0 1 0 5.6M20 21c0-2.7-1.8-5-4.3-5.8"/></svg>Usuários</a>
+      </nav>
+      <div class="sidebar__footer">
+        <div class="sidebar__user">
+          <div class="sidebar__user-email" data-user-email></div>
+          <span class="sidebar__user-papel" data-user-papel></span>
+        </div>
+        <button type="button" class="sidebar__logout" data-logout><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>Sair</button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="row">
+          <button type="button" class="menu-toggle" data-menu-toggle aria-label="Abrir menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="20" height="20"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+          <div class="topbar__title">
+            <div>
+              <h1 id="page-title">Nova venda</h1>
+              <div class="topbar__subtitle" id="page-subtitle">Registre um carregamento de melancia</div>
+            </div>
+          </div>
+        </div>
+        <div class="topbar__actions">
+          <a href="vendas.html" class="btn btn-secondary">Cancelar</a>
+        </div>
+      </header>
+
+      <main class="content content--narrow">
+        <form id="venda-form" class="stack" novalidate>
+          <div class="card">
+            <div class="card__body">
+              <fieldset>
+                <legend>Identificação</legend>
+                <div class="field" style="max-width: 220px;">
+                  <label for="f-data">Data da venda</label>
+                  <input class="input" type="date" id="f-data" required>
+                  <span class="error-msg" data-field-error-for="dataVenda" hidden></span>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__body">
+              <fieldset>
+                <legend>Destinatário</legend>
+                <div class="field">
+                  <label>Cliente</label>
+                  <div id="picker-cliente"></div>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__body">
+              <fieldset>
+                <legend>Peso e frutas</legend>
+                <div class="grid-3">
+                  <div class="field">
+                    <label for="f-peso-bruto">Peso bruto</label>
+                    <div class="input-suffix-wrap"><input class="input" type="number" step="0.01" min="0" id="f-peso-bruto" required><span class="input-suffix">kg</span></div>
+                    <span class="error-msg" data-field-error-for="pesoBruto" hidden></span>
+                  </div>
+                  <div class="field">
+                    <label for="f-desc-tara">Desconto de tara</label>
+                    <div class="input-suffix-wrap"><input class="input" type="number" step="0.01" min="0" id="f-desc-tara" required><span class="input-suffix">kg</span></div>
+                    <span class="error-msg" data-field-error-for="descTara" hidden></span>
+                  </div>
+                  <div class="field">
+                    <label for="f-desc-palha">Desc. de palha <span class="text-faint">(opcional)</span></label>
+                    <div class="input-suffix-wrap"><input class="input" type="number" step="0.01" min="0" id="f-desc-palha" value="0"><span class="input-suffix">kg</span></div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Peso líquido</label>
+                  <div class="readonly-field num" id="calc-peso-liquido">0,00 kg</div>
+                </div>
+                <div class="grid-2">
+                  <div class="field">
+                    <label for="f-total-frutas">Total de frutas</label>
+                    <input class="input" type="number" step="1" min="1" id="f-total-frutas" required>
+                    <span class="error-msg" data-field-error-for="totalFrutas" hidden></span>
+                  </div>
+                  <div class="field">
+                    <label>Média de peso por fruta</label>
+                    <div class="readonly-field num" id="calc-media-peso">— kg</div>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__body">
+              <fieldset>
+                <legend>Financeiro</legend>
+                <div class="grid-2">
+                  <div class="field">
+                    <label for="f-preco-kg">Preço por kg negociado</label>
+                    <div class="input-suffix-wrap"><input class="input" type="number" step="0.0001" min="0" id="f-preco-kg" required><span class="input-suffix">R$/kg</span></div>
+                    <span class="error-msg" data-field-error-for="precoKg" hidden></span>
+                  </div>
+                  <div class="field">
+                    <label>Valor da mercadoria</label>
+                    <div class="readonly-field num" id="calc-valor-mercadoria">R$ 0,00</div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>Frete</label>
+                  <div class="radio-group">
+                    <label class="radio-card">
+                      <input type="radio" name="tipoFrete" value="NEGOCIADO" id="f-tipo-negociado" checked>
+                      <span class="radio-card__label">Frete negociado (valor fechado)</span>
+                    </label>
+                    <label class="radio-card">
+                      <input type="radio" name="tipoFrete" value="POR_KG" id="f-tipo-porkg">
+                      <span class="radio-card__label">Frete por kg</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="grid-2">
+                  <div class="field" id="field-valor-frete">
+                    <label for="f-valor-frete">Valor do frete</label>
+                    <div class="input-suffix-wrap"><input class="input" type="number" step="0.01" min="0" id="f-valor-frete"><span class="input-suffix">R$</span></div>
+                  </div>
+                  <div class="field" id="field-preco-frete-kg" hidden>
+                    <label for="f-preco-frete-kg">Preço do frete por kg</label>
+                    <div class="input-suffix-wrap"><input class="input" type="number" step="0.0001" min="0" id="f-preco-frete-kg"><span class="input-suffix">R$/kg</span></div>
+                  </div>
+                  <div class="field">
+                    <label>Restante a pagar</label>
+                    <div class="readonly-field num" id="calc-restante">R$ 0,00</div>
+                  </div>
+                </div>
+
+                <div class="grid-2">
+                  <div class="field">
+                    <label for="f-vencimento">Vencimento <span class="text-faint">(opcional)</span></label>
+                    <input class="input" type="date" id="f-vencimento">
+                  </div>
+                  <div class="field">
+                    <label for="f-nf">Nota fiscal <span class="text-faint">(opcional)</span></label>
+                    <input class="input" type="text" id="f-nf" placeholder="Número da NF">
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="f-status">Status de pagamento</label>
+                  <select class="select" id="f-status">
+                    <option value="PENDENTE">Pendente</option>
+                    <option value="PAGO_PARCIAL">Pago parcial</option>
+                    <option value="PAGO">Pago</option>
+                  </select>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__body">
+              <fieldset>
+                <legend>Produtor</legend>
+                <div class="field">
+                  <label>Produtor</label>
+                  <div id="picker-produtor"></div>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__body">
+              <fieldset>
+                <legend>Logística</legend>
+                <div class="grid-2">
+                  <div class="field">
+                    <label>Motorista</label>
+                    <div id="picker-motorista"></div>
+                  </div>
+                  <div class="field">
+                    <label>Veículo</label>
+                    <div id="picker-veiculo"></div>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__body">
+              <fieldset>
+                <legend>Observações</legend>
+                <div class="field">
+                  <textarea class="textarea" id="f-obs" placeholder="Anotações adicionais sobre esta venda (opcional)"></textarea>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          <div class="row" style="justify-content:flex-end;">
+            <a href="vendas.html" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary" id="btn-submit">Salvar venda</button>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/format.js"></script>
+  <script src="assets/js/toast.js"></script>
+  <script src="assets/js/shell.js"></script>
+  <script src="assets/js/entity-picker.js"></script>
+  <script src="assets/js/pages/venda-form.js"></script>
+</body>
+</html>
