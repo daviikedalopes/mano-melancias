@@ -16,19 +16,19 @@
   </component>
   <component name="DBNavigator.Project.DatabaseAssistantManager">
     <assistants>
-      <assistant-state connection-id="virtual-postgres-connection" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
-        <tools />
-        <mcp-servers />
-      </assistant-state>
       <assistant-state connection-id="virtual-postgres-connection" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="" availability="AVAILABLE" acknowledgement="NONE" selected="true">
         <tools />
         <mcp-servers />
       </assistant-state>
-      <assistant-state connection-id="aa96e640-4200-48ae-8c53-fccd4ce38aed" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
+      <assistant-state connection-id="virtual-postgres-connection" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
         <tools />
         <mcp-servers />
       </assistant-state>
       <assistant-state connection-id="aa96e640-4200-48ae-8c53-fccd4ce38aed" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="" availability="AVAILABLE" acknowledgement="NONE" selected="true">
+        <tools />
+        <mcp-servers />
+      </assistant-state>
+      <assistant-state connection-id="aa96e640-4200-48ae-8c53-fccd4ce38aed" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
         <tools />
         <mcp-servers />
       </assistant-state>
@@ -75,9 +75,9 @@
     <mapping file-url="file://$PROJECT_DIR$/api/src/main/resources/db/migration/V6__create_venda_table.sql" connection-id="aa96e640-4200-48ae-8c53-fccd4ce38aed" session-id="MAIN" current-schema="public" />
     <mapping file-url="file://$PROJECT_DIR$/api/target/classes/db/migration/V2__create_produtor_table.sql" connection-id="aa96e640-4200-48ae-8c53-fccd4ce38aed" session-id="MAIN" current-schema="public" />
     <mapping file-url="file://$PROJECT_DIR$/api/src/main/resources/db/migration/V4__create_veiculo_table.sql" connection-id="aa96e640-4200-48ae-8c53-fccd4ce38aed" session-id="MAIN" current-schema="public" />
-    <mapping file-url="file://$PROJECT_DIR$" connection-id="aa96e640-4200-48ae-8c53-fccd4ce38aed" session-id="MAIN" current-schema="manomelancias" />
-    <mapping file-url="file://$PROJECT_DIR$/api/target/classes/db/migration/V3__create_motorista_table.sql" connection-id="aa96e640-4200-48ae-8c53-fccd4ce38aed" session-id="MAIN" current-schema="public" />
     <mapping file-url="file://$PROJECT_DIR$/api/target/classes/db/migration/V4__create_veiculo_table.sql" connection-id="aa96e640-4200-48ae-8c53-fccd4ce38aed" session-id="MAIN" current-schema="public" />
+    <mapping file-url="file://$PROJECT_DIR$/api/target/classes/db/migration/V3__create_motorista_table.sql" connection-id="aa96e640-4200-48ae-8c53-fccd4ce38aed" session-id="MAIN" current-schema="public" />
+    <mapping file-url="file://$PROJECT_DIR$" connection-id="aa96e640-4200-48ae-8c53-fccd4ce38aed" session-id="MAIN" current-schema="manomelancias" />
     <mapping file-url="file://$PROJECT_DIR$/api/src/main/resources/db/migration/V1__create_cliente_table.sql" connection-id="aa96e640-4200-48ae-8c53-fccd4ce38aed" session-id="MAIN" current-schema="public" />
     <mapping file-url="file://$PROJECT_DIR$/api/target/classes/db/migration/V1__create_cliente_table.sql" connection-id="aa96e640-4200-48ae-8c53-fccd4ce38aed" session-id="MAIN" current-schema="public" />
     <mapping file-url="file://$PROJECT_DIR$/api/src/main/resources/db/migration/V3__create_motorista_table.sql" connection-id="aa96e640-4200-48ae-8c53-fccd4ce38aed" session-id="MAIN" current-schema="public" />
