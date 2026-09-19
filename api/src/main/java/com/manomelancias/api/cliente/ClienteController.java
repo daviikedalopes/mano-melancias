@@ -31,8 +31,9 @@ public class ClienteController {
     public List<ClienteResponseDTO> listar(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String municipio,
-            @RequestParam(required = false) String estado) {
-        return clienteService.buscar(nome, municipio, estado).stream()
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false, defaultValue = "false") boolean incluirInativos) {
+        return clienteService.buscar(nome, municipio, estado, incluirInativos).stream()
                 .map(ClienteResponseDTO::from)
                 .collect(Collectors.toList());
     }
@@ -57,5 +58,10 @@ public class ClienteController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void inativar(@PathVariable UUID id) {
         clienteService.inativar(id);
+    }
+
+    @PostMapping("/{id}/reativar")
+    public ClienteResponseDTO reativar(@PathVariable UUID id) {
+        return ClienteResponseDTO.from(clienteService.reativar(id));
     }
 }

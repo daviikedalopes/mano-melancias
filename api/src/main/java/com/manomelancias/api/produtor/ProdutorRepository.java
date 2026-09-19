@@ -17,8 +17,8 @@ public interface ProdutorRepository extends JpaRepository<Produtor, UUID> {
     @Query("""
         SELECT p FROM Produtor p
         WHERE p.ativo = true
-          AND (:nome IS NULL OR LOWER(p.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
-          AND (:cidade IS NULL OR LOWER(p.cidade) LIKE LOWER(CONCAT('%', :cidade, '%')))
+          AND (:nome IS NULL OR LOWER(p.nome) LIKE LOWER(CONCAT('%', CAST(:nome AS string), '%')))
+          AND (:cidade IS NULL OR LOWER(p.cidade) LIKE LOWER(CONCAT('%', CAST(:cidade AS string), '%')))
         """)
     List<Produtor> buscar(@Param("nome") String nome, @Param("cidade") String cidade);
 }

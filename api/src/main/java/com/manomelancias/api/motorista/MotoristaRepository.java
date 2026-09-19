@@ -17,7 +17,7 @@ public interface MotoristaRepository extends JpaRepository<Motorista, UUID> {
     @Query("""
         SELECT m FROM Motorista m
         WHERE m.ativo = true
-          AND (:nome IS NULL OR LOWER(m.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+          AND (:nome IS NULL OR LOWER(m.nome) LIKE LOWER(CONCAT('%', CAST(:nome AS string), '%')))
         """)
     List<Motorista> buscar(@Param("nome") String nome);
 }

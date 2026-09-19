@@ -15,12 +15,21 @@ public interface ClienteRepository extends JpaRepository<Cliente, UUID> {
 
     List<Cliente> findByAtivoTrue();
 
+    /**
+     * incluirInativos = false (padrão): só clientes ativos.
+     * incluirInativos = true: ativos e inativos juntos (ordenados com ativos primeiro).
+     */
     @Query("""
         SELECT c FROM Cliente c
-        WHERE c.ativo = true
-          AND (:nome IS NULL OR LOWER(c.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
-          AND (:municipio IS NULL OR LOWER(c.municipio) LIKE LOWER(CONCAT('%', :municipio, '%')))
-          AND (:estado IS NULL OR LOWER(c.estado) = LOWER(:estado))
+        WHERE (:incluirInativos = true OR c.ativo = true)
+          AND (:nome IS NULL OR LOWER(c.nome) LIKE LOWER(CONCAT('%', CAST(:nome AS string), '%')))
+          AND (:municipio IS NULL OR LOWER(c.municipio) LIKE LOWER(CONCAT('%', CAST(:municipio AS string), '%')))
+          AND (:estado IS NULL OR LOWER(c.estado) = LOWER(CAST(:estado AS string)))
+        ORDER BY c.ativo DESC, c.nome ASC
         """)
-    List<Cliente> buscar(@Param("nome") String nome, @Param("municipio") String municipio, @Param("estado") String estado);
+    List<Cliente> buscar(
+            @Param("nome") String nome,
+            @Param("municipio") String municipio,
+            @Param("estado") String estado,
+            @Param("incluirInativos") boolean incluirInativos);
 }

@@ -35,8 +35,8 @@ public class ClienteService {
         return clienteRepository.findByAtivoTrue();
     }
 
-    public List<Cliente> buscar(String nome, String municipio, String estado) {
-        return clienteRepository.buscar(nome, municipio, estado);
+    public List<Cliente> buscar(String nome, String municipio, String estado, boolean incluirInativos) {
+        return clienteRepository.buscar(nome, municipio, estado, incluirInativos);
     }
 
     public Cliente buscarPorId(UUID id) {
@@ -65,5 +65,12 @@ public class ClienteService {
         Cliente cliente = buscarPorId(id);
         cliente.setAtivo(false);
         clienteRepository.save(cliente);
+    }
+
+    @Transactional
+    public Cliente reativar(UUID id) {
+        Cliente cliente = buscarPorId(id);
+        cliente.setAtivo(true);
+        return clienteRepository.save(cliente);
     }
 }

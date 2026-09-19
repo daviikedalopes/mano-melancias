@@ -14,8 +14,16 @@ public interface VeiculoRepository extends JpaRepository<Veiculo, UUID> {
 
     @Query("""
         SELECT v FROM Veiculo v
-        WHERE (:placa IS NULL OR LOWER(v.placa) LIKE LOWER(CONCAT('%', :placa, '%')))
+        LEFT JOIN FETCH v.motorista
+        WHERE (:placa IS NULL OR LOWER(v.placa) LIKE LOWER(CONCAT('%', CAST(:placa AS string), '%')))
           AND (:motoristaId IS NULL OR v.motorista.id = :motoristaId)
         """)
     List<Veiculo> buscar(@Param("placa") String placa, @Param("motoristaId") UUID motoristaId);
+
+    @Query("""
+        SELECT v FROM Veiculo v
+        LEFT JOIN FETCH v.motorista
+        WHERE v.id = :id
+        """)
+    Optional<Veiculo> buscarPorIdComMotorista(@Param("id") UUID id);
 }

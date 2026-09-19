@@ -40,7 +40,7 @@ public class VeiculoService {
     }
 
     public Veiculo buscarPorId(UUID id) {
-        return veiculoRepository.findById(id)
+        return veiculoRepository.buscarPorIdComMotorista(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Veículo não encontrado: " + id));
     }
 

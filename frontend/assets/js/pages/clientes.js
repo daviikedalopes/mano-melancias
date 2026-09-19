@@ -18,6 +18,7 @@
       nome: qs('f-nome').value.trim(),
       municipio: qs('f-municipio').value.trim(),
       estado: qs('f-estado').value.trim(),
+      incluirInativos: qs('f-incluir-inativos').checked ? true : undefined,
     };
     const list = await window.Api.get('/clientes' + window.Api.buildQuery(params));
     renderList(list);
@@ -34,12 +35,19 @@
       .map(
         (c) => `
       <tr>
-        <td><span class="table__primary">${window.escapeHtml(c.nome)}</span></td>
+        <td>
+          <span class="table__primary">${window.escapeHtml(c.nome)}</span>
+          ${c.ativo ? '' : '<span class="badge badge--inativo" style="margin-left:8px;">Inativo</span>'}
+        </td>
         <td>${window.escapeHtml(c.municipio)}/${window.escapeHtml(c.estado)}</td>
         <td>${c.telefone ? window.escapeHtml(c.telefone) : '<span class="text-faint">—</span>'}</td>
         <td class="table__actions">
           <button class="btn btn-ghost btn-sm" type="button" data-edit="${c.id}">Editar</button>
-          <button class="btn btn-danger btn-sm" type="button" data-inativar="${c.id}">Inativar</button>
+          ${
+            c.ativo
+              ? `<button class="btn btn-danger btn-sm" type="button" data-inativar="${c.id}">Inativar</button>`
+              : `<button class="btn btn-secondary btn-sm" type="button" data-reativar="${c.id}">Reativar</button>`
+          }
         </td>
       </tr>`
       )
@@ -51,6 +59,9 @@
     els.tbody.querySelectorAll('[data-inativar]').forEach((btn) => {
       btn.addEventListener('click', () => inativar(btn.dataset.inativar));
     });
+    els.tbody.querySelectorAll('[data-reativar]').forEach((btn) => {
+      btn.addEventListener('click', () => reativar(btn.dataset.reativar));
+    });
   }
 
   async function inativar(id) {
@@ -61,6 +72,16 @@
       loadList();
     } catch (err) {
       window.Toast.error(err.message || 'Não foi possível inativar o cliente.');
+    }
+  }
+
+  async function reativar(id) {
+    try {
+      await window.Api.post('/clientes/' + id + '/reativar');
+      window.Toast.success('Cliente reativado.');
+      loadList();
+    } catch (err) {
+      window.Toast.error(err.message || 'Não foi possível reativar o cliente.');
     }
   }
 
@@ -157,6 +178,9 @@
     els.form.addEventListener('submit', onSubmit);
     els.filterForm.addEventListener('submit', (e) => {
       e.preventDefault();
+      loadList().catch((err) => window.Toast.error(err.message || 'Erro ao buscar clientes.'));
+    });
+    qs('f-incluir-inativos').addEventListener('change', () => {
       loadList().catch((err) => window.Toast.error(err.message || 'Erro ao buscar clientes.'));
     });
     qs('m-estado').addEventListener('input', (e) => {
