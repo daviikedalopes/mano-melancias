@@ -32,5 +32,3 @@ build/
 ### resources (arquivos com credenciais locais — nunca versionar) ###
 src/main/resources/application.properties
 src/main/resources/application-*.properties
-!src/main/resources/application.properties.example
-!src/main/resources/application-*.properties.example
