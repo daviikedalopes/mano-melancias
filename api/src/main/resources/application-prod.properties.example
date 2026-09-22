@@ -1,0 +1,5 @@
+spring.datasource.url=jdbc:postgresql://localhost:5432/manomelancias
+spring.datasource.username=CHANGE_ME
+spring.datasource.password=CHANGE_ME
+
+spring.jpa.show-sql=false
