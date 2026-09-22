@@ -81,7 +81,7 @@ public class VendaService {
     // --- CRUD ---
 
     public Venda buscarPorId(UUID id) {
-        return vendaRepository.findById(id)
+        return vendaRepository.buscarPorIdComRelacionamentos(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Venda não encontrada: " + id));
     }
 

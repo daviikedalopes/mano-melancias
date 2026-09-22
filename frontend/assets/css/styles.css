@@ -552,6 +552,9 @@ table.table tbody tr.is-clickable { cursor: pointer; }
 .modal__body { padding: 22px; overflow-y: auto; }
 .modal__footer { padding: 16px 22px; border-top: 1px solid var(--hairline); display: flex; justify-content: flex-end; gap: 10px; }
 
+.modal--confirm { max-width: 420px; }
+.modal--confirm .modal__body p { margin: 0; color: var(--ink-soft); font-size: 14px; line-height: 1.5; }
+
 /* ============================================================
    Toasts
    ============================================================ */

@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface VendaRepository extends JpaRepository<Venda, UUID> {
@@ -19,6 +20,22 @@ public interface VendaRepository extends JpaRepository<Venda, UUID> {
 
     @Query("""
         SELECT v FROM Venda v
+        LEFT JOIN FETCH v.cliente
+        LEFT JOIN FETCH v.produtor
+        LEFT JOIN FETCH v.motorista
+        LEFT JOIN FETCH v.veiculo
+        LEFT JOIN FETCH v.createdBy
+        WHERE v.id = :id
+        """)
+    Optional<Venda> buscarPorIdComRelacionamentos(@Param("id") UUID id);
+
+    @Query("""
+        SELECT v FROM Venda v
+        LEFT JOIN FETCH v.cliente
+        LEFT JOIN FETCH v.produtor
+        LEFT JOIN FETCH v.motorista
+        LEFT JOIN FETCH v.veiculo
+        LEFT JOIN FETCH v.createdBy
         WHERE (:dataInicio IS NULL OR v.dataVenda >= :dataInicio)
           AND (:dataFim IS NULL OR v.dataVenda <= :dataFim)
           AND (:clienteId IS NULL OR v.cliente.id = :clienteId)
@@ -36,6 +53,8 @@ public interface VendaRepository extends JpaRepository<Venda, UUID> {
             @Param("statusPagamento") StatusPagamento statusPagamento);
 
     // --- Relatórios (usados por RelatorioService, que não tem repository próprio) ---
+    // Estas consultas usam "SELECT new DTO(...)" com campos agregados/escalares,
+    // não a entidade inteira — não sofrem do mesmo problema de lazy loading.
 
     @Query("""
         SELECT new com.manomelancias.api.relatorio.dto.VendasPeriodoResponseDTO(

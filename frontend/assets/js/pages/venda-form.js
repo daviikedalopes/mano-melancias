@@ -3,6 +3,8 @@
   const state = {
     vendaId: new URLSearchParams(location.search).get('id'),
     pickers: {},
+    draftInterval: null,
+    pristineSnapshot: null,
   };
 
   function round2(n) {
@@ -63,13 +65,170 @@
       'f-preco-kg',
       'f-valor-frete',
       'f-preco-frete-kg',
-    ].forEach((id) => qs(id).addEventListener('input', recalc));
-    document.querySelectorAll('input[name="tipoFrete"]').forEach((el) => el.addEventListener('change', onTipoFreteChange));
+    ].forEach((id) => qs(id).addEventListener('input', () => { recalc(); saveDraft(); }));
+
+    ['f-data', 'f-vencimento', 'f-nf', 'f-status', 'f-obs'].forEach((id) => {
+      qs(id).addEventListener('input', saveDraft);
+      qs(id).addEventListener('change', saveDraft);
+    });
+
+    document.querySelectorAll('input[name="tipoFrete"]').forEach((el) =>
+      el.addEventListener('change', () => { onTipoFreteChange(); saveDraft(); })
+    );
+  }
+
+  // ---- Rascunho automático (localStorage) ----
+  function draftKey() {
+    return 'mm_venda_draft:' + (state.vendaId || 'novo');
+  }
+
+  function collectDraft() {
+    const tipoFreteEl = document.querySelector('input[name="tipoFrete"]:checked');
+    return {
+      savedAt: Date.now(),
+      fields: {
+        data: qs('f-data').value,
+        pesoBruto: qs('f-peso-bruto').value,
+        descTara: qs('f-desc-tara').value,
+        descPalha: qs('f-desc-palha').value,
+        totalFrutas: qs('f-total-frutas').value,
+        precoKg: qs('f-preco-kg').value,
+        tipoFrete: tipoFreteEl ? tipoFreteEl.value : null,
+        valorFrete: qs('f-valor-frete').value,
+        precoFreteKg: qs('f-preco-frete-kg').value,
+        vencimento: qs('f-vencimento').value,
+        nf: qs('f-nf').value,
+        status: qs('f-status').value,
+        obs: qs('f-obs').value,
+      },
+      pickers: {
+        cliente: pickerSnapshot(state.pickers.cliente),
+        produtor: pickerSnapshot(state.pickers.produtor),
+        motorista: pickerSnapshot(state.pickers.motorista),
+        veiculo: pickerSnapshot(state.pickers.veiculo),
+      },
+    };
+  }
+
+  // Guarda o estado completo do EntityPicker: um registro já selecionado
+  // (com título/subtítulo, não só o id) OU um cadastro novo em andamento
+  // (formulário aberto + valores já digitados), para restaurar de verdade.
+  function pickerSnapshot(picker) {
+    if (!picker) return null;
+    return {
+      selected: picker.selected || null,
+      novoOpen: !!picker.novoOpen,
+      novoValues: picker.novoValues || {},
+    };
+  }
+
+  function restorePicker(picker, snapshot) {
+    if (!picker || !snapshot) return;
+    if (snapshot.selected) {
+      picker.setSelected(snapshot.selected, { silent: true });
+      return;
+    }
+    if (snapshot.novoOpen) {
+      picker.openNewForm();
+      Object.entries(snapshot.novoValues || {}).forEach(([nome, valor]) => {
+        const input = picker.newFormEl.querySelector(`[data-field="${nome}"]`);
+        if (input) input.value = valor;
+      });
+      picker.syncNovoValues();
+    }
+  }
+
+  function saveDraft() {
+    try {
+      localStorage.setItem(draftKey(), JSON.stringify(collectDraft()));
+    } catch (err) {
+      // localStorage indisponível (modo privado, etc.) — rascunho simplesmente não é salvo
+    }
+  }
+
+  function loadDraft() {
+    try {
+      const raw = localStorage.getItem(draftKey());
+      return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function clearDraft() {
+    try {
+      localStorage.removeItem(draftKey());
+    } catch (err) {
+      // ignora
+    }
+  }
+
+  function applyDraft(draft) {
+    const f = draft.fields || {};
+    qs('f-data').value = f.data || qs('f-data').value;
+    qs('f-peso-bruto').value = f.pesoBruto || '';
+    qs('f-desc-tara').value = f.descTara || '';
+    qs('f-desc-palha').value = f.descPalha || '';
+    qs('f-total-frutas').value = f.totalFrutas || '';
+    qs('f-preco-kg').value = f.precoKg || '';
+    qs('f-valor-frete').value = f.valorFrete || '';
+    qs('f-preco-frete-kg').value = f.precoFreteKg || '';
+    qs('f-vencimento').value = f.vencimento || '';
+    qs('f-nf').value = f.nf || '';
+    if (f.status) qs('f-status').value = f.status;
+    qs('f-obs').value = f.obs || '';
+
+    if (f.tipoFrete === 'POR_KG') {
+      qs('f-tipo-porkg').checked = true;
+    } else if (f.tipoFrete === 'NEGOCIADO') {
+      qs('f-tipo-negociado').checked = true;
+    }
+    onTipoFreteChange();
+
+    ['cliente', 'produtor', 'motorista', 'veiculo'].forEach((nome) => {
+      restorePicker(state.pickers[nome], draft.pickers && draft.pickers[nome]);
+    });
+
+    recalc();
+  }
+
+  // Compara o rascunho salvo com o estado "limpo" do formulário (capturado
+  // antes de qualquer edição do usuário). Se forem iguais, o rascunho não
+  // representa nenhuma alteração real e não há motivo para perguntar nada.
+  function draftTemAlteracoes(draft) {
+    if (!state.pristineSnapshot) return true;
+    return (
+      JSON.stringify(draft.fields) !== JSON.stringify(state.pristineSnapshot.fields) ||
+      JSON.stringify(draft.pickers) !== JSON.stringify(state.pristineSnapshot.pickers)
+    );
+  }
+
+  async function ofertarRestaurarRascunho() {
+    const draft = loadDraft();
+    if (!draft) return;
+
+    if (!draftTemAlteracoes(draft)) {
+      clearDraft();
+      return;
+    }
+
+    const restaurar = await window.ConfirmModal.show({
+      title: 'Rascunho encontrado',
+      message: 'Encontramos um rascunho não salvo desta venda. Deseja continuar de onde parou?',
+      confirmText: 'Continuar de onde parei',
+      cancelText: 'Começar do zero',
+    });
+    if (restaurar) {
+      applyDraft(draft);
+    } else {
+      clearDraft();
+    }
   }
 
   // ---- Pickers de cliente / produtor / motorista / veículo ----
   function initPickers() {
     state.pickers.cliente = new window.EntityPicker(qs('picker-cliente'), {
+      onChange: saveDraft,
       placeholder: 'Buscar cliente por nome...',
       newLabel: 'Cadastrar novo cliente',
       searchFn: async (q) => {
@@ -85,6 +244,7 @@
     });
 
     state.pickers.produtor = new window.EntityPicker(qs('picker-produtor'), {
+      onChange: saveDraft,
       placeholder: 'Buscar produtor por nome...',
       newLabel: 'Cadastrar novo produtor',
       searchFn: async (q) => {
@@ -99,6 +259,7 @@
     });
 
     state.pickers.motorista = new window.EntityPicker(qs('picker-motorista'), {
+      onChange: saveDraft,
       placeholder: 'Buscar motorista por nome...',
       newLabel: 'Cadastrar novo motorista',
       searchFn: async (q) => {
@@ -113,6 +274,7 @@
     });
 
     state.pickers.veiculo = new window.EntityPicker(qs('picker-veiculo'), {
+      onChange: saveDraft,
       placeholder: 'Buscar veículo por placa...',
       newLabel: 'Cadastrar novo veículo',
       searchFn: async (q) => {
@@ -223,6 +385,8 @@
       } else {
         venda = await window.Api.post('/vendas', payload);
       }
+      clearDraft();
+      if (state.draftInterval) clearInterval(state.draftInterval);
       location.href = 'venda-detalhe.html?id=' + venda.id + (state.vendaId ? '' : '&created=1');
     } catch (err) {
       if (err.erros) {
@@ -286,16 +450,24 @@
     wireRecalc();
     qs('venda-form').addEventListener('submit', onSubmit);
 
+    window.addEventListener('beforeunload', saveDraft);
+    window.addEventListener('pagehide', saveDraft);
+    state.draftInterval = setInterval(saveDraft, 3000);
+
     if (state.vendaId) {
       try {
         await loadForEdit();
       } catch (err) {
         window.Toast.error(err.message || 'Não foi possível carregar esta venda.');
+        return;
       }
     } else {
       qs('f-data').value = window.Fmt.todayIso();
       recalc();
     }
+
+    state.pristineSnapshot = collectDraft();
+    await ofertarRestaurarRascunho();
   }
 
   if (window.Shell.boot()) init();

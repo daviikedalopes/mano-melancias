@@ -22,7 +22,16 @@
 
   function initLogout() {
     document.querySelectorAll('[data-logout]').forEach((btn) => {
-      btn.addEventListener('click', () => window.Auth.logout());
+      btn.addEventListener('click', async () => {
+        const confirmado = await window.ConfirmModal.show({
+          title: 'Sair do sistema',
+          message: 'Tem certeza de que deseja sair do sistema?',
+          confirmText: 'Sair',
+          cancelText: 'Cancelar',
+          confirmVariant: 'danger',
+        });
+        if (confirmado) window.Auth.logout();
+      });
     });
   }
 
