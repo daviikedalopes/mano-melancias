@@ -17,6 +17,7 @@
     const params = {
       nome: qs('f-nome').value.trim(),
       cidade: qs('f-cidade').value.trim(),
+      incluirInativos: qs('f-incluir-inativos').checked ? true : undefined,
     };
     const list = await window.Api.get('/produtores' + window.Api.buildQuery(params));
     renderList(list);
@@ -33,12 +34,20 @@
       .map(
         (p) => `
       <tr>
-        <td><span class="table__primary">${window.escapeHtml(p.nome)}</span></td>
+        <td>
+          <span class="table__primary">${window.escapeHtml(p.nome)}</span>
+          ${p.ativo ? '' : '<span class="badge badge--inativo" style="margin-left:8px;">Inativo</span>'}
+        </td>
         <td>${window.escapeHtml(p.cidade)}</td>
         <td>${p.telefone ? window.escapeHtml(p.telefone) : '<span class="text-faint">—</span>'}</td>
         <td class="table__actions">
           <button class="btn btn-ghost btn-sm" type="button" data-edit="${p.id}">Editar</button>
-          <button class="btn btn-danger btn-sm" type="button" data-inativar="${p.id}">Inativar</button>
+          ${
+            p.ativo
+              ? `<button class="btn btn-danger btn-sm" type="button" data-inativar="${p.id}">Inativar</button>`
+              : `<button class="btn btn-secondary btn-sm" type="button" data-reativar="${p.id}">Reativar</button>`
+          }
+          ${window.Auth.isAdmin() ? `<button class="btn btn-danger btn-sm" type="button" data-excluir="${p.id}">Excluir</button>` : ''}
         </td>
       </tr>`
       )
@@ -50,6 +59,12 @@
     els.tbody.querySelectorAll('[data-inativar]').forEach((btn) => {
       btn.addEventListener('click', () => inativar(btn.dataset.inativar));
     });
+    els.tbody.querySelectorAll('[data-reativar]').forEach((btn) => {
+      btn.addEventListener('click', () => reativar(btn.dataset.reativar));
+    });
+    els.tbody.querySelectorAll('[data-excluir]').forEach((btn) => {
+      btn.addEventListener('click', () => excluir(btn.dataset.excluir));
+    });
   }
 
   async function inativar(id) {
@@ -60,6 +75,27 @@
       loadList();
     } catch (err) {
       window.Toast.error(err.message || 'Não foi possível inativar o produtor.');
+    }
+  }
+
+  async function excluir(id) {
+    if (!confirm('Excluir este produtor definitivamente? Essa ação não pode ser desfeita.')) return;
+    try {
+      await window.Api.del('/produtores/' + id + '/excluir');
+      window.Toast.success('Produtor excluído.');
+      loadList();
+    } catch (err) {
+      window.Toast.error(err.message || 'Não foi possível excluir o produtor.');
+    }
+  }
+
+  async function reativar(id) {
+    try {
+      await window.Api.post('/produtores/' + id + '/reativar');
+      window.Toast.success('Produtor reativado.');
+      loadList();
+    } catch (err) {
+      window.Toast.error(err.message || 'Não foi possível reativar o produtor.');
     }
   }
 
@@ -154,6 +190,9 @@
     els.form.addEventListener('submit', onSubmit);
     els.filterForm.addEventListener('submit', (e) => {
       e.preventDefault();
+      loadList().catch((err) => window.Toast.error(err.message || 'Erro ao buscar produtores.'));
+    });
+    qs('f-incluir-inativos').addEventListener('change', () => {
       loadList().catch((err) => window.Toast.error(err.message || 'Erro ao buscar produtores.'));
     });
     qs('m-telefone').addEventListener('input', (e) => {

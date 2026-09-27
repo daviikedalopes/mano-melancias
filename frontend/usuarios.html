@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' http://localhost:8080; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Usuários · Mano Melancias</title>
   <link rel="stylesheet" href="assets/css/styles.css">
@@ -60,7 +61,7 @@
           <div class="card__body card__body--tight">
             <div class="table-wrap">
               <table class="table">
-                <thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th></tr></thead>
+                <thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th><th></th></tr></thead>
                 <tbody id="usuarios-body"></tbody>
               </table>
             </div>
@@ -95,7 +96,8 @@
           </div>
           <div class="field">
             <label for="m-senha">Senha provisória</label>
-            <input class="input" type="password" id="m-senha" placeholder="Mínimo 6 caracteres" required>
+            <input class="input" type="password" id="m-senha" placeholder="Senha provisória" minlength="8" required>
+            <span class="hint">Mín. 8 caracteres, com 1 letra maiúscula, 1 número e 1 caractere especial.</span>
             <span class="error-msg" data-field-error-for="senha" hidden></span>
           </div>
           <div class="field">

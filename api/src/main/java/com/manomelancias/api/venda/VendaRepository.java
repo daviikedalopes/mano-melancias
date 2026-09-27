@@ -15,8 +15,17 @@ import java.util.UUID;
 
 public interface VendaRepository extends JpaRepository<Venda, UUID> {
 
-    @Query(value = "SELECT nextval('venda_numero_seq')", nativeQuery = true)
-    Long proximoNumero();
+    /**
+     * Menor número ainda não usado (preenche a lacuna de uma venda excluída),
+     * ou o próximo depois do maior existente se não houver lacuna.
+     */
+    @Query(value = """
+        SELECT COALESCE(MIN(s.n), 1)
+        FROM generate_series(1, (SELECT COALESCE(MAX(numero), 0) FROM venda) + 1) AS s(n)
+        LEFT JOIN venda v ON v.numero = s.n
+        WHERE v.numero IS NULL
+        """, nativeQuery = true)
+    Integer proximoNumero();
 
     @Query("""
         SELECT v FROM Venda v
@@ -36,8 +45,8 @@ public interface VendaRepository extends JpaRepository<Venda, UUID> {
         LEFT JOIN FETCH v.motorista
         LEFT JOIN FETCH v.veiculo
         LEFT JOIN FETCH v.createdBy
-        WHERE (:dataInicio IS NULL OR v.dataVenda >= :dataInicio)
-          AND (:dataFim IS NULL OR v.dataVenda <= :dataFim)
+        WHERE (CAST(:dataInicio AS LocalDate) IS NULL OR v.dataVenda >= :dataInicio)
+          AND (CAST(:dataFim AS LocalDate) IS NULL OR v.dataVenda <= :dataFim)
           AND (:clienteId IS NULL OR v.cliente.id = :clienteId)
           AND (:produtorId IS NULL OR v.produtor.id = :produtorId)
           AND (:motoristaId IS NULL OR v.motorista.id = :motoristaId)
@@ -61,8 +70,14 @@ public interface VendaRepository extends JpaRepository<Venda, UUID> {
             COUNT(v), COALESCE(SUM(v.valorMercadoria), 0), COALESCE(SUM(v.valorFrete), 0), COALESCE(SUM(v.restantePagar), 0))
         FROM Venda v
         WHERE v.dataVenda BETWEEN :inicio AND :fim
+          AND (:produtorId IS NULL OR v.produtor.id = :produtorId)
+          AND (:clienteId IS NULL OR v.cliente.id = :clienteId)
         """)
-    VendasPeriodoResponseDTO totalVendidoPorPeriodo(@Param("inicio") LocalDate inicio, @Param("fim") LocalDate fim);
+    VendasPeriodoResponseDTO totalVendidoPorPeriodo(
+            @Param("inicio") LocalDate inicio,
+            @Param("fim") LocalDate fim,
+            @Param("produtorId") UUID produtorId,
+            @Param("clienteId") UUID clienteId);
 
     @Query("""
         SELECT new com.manomelancias.api.relatorio.dto.ProdutorRelatorioDTO(

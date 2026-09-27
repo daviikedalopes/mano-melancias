@@ -64,4 +64,10 @@ public class ClienteController {
     public ClienteResponseDTO reativar(@PathVariable UUID id) {
         return ClienteResponseDTO.from(clienteService.reativar(id));
     }
+
+    @DeleteMapping("/{id}/excluir")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void excluir(@PathVariable UUID id) {
+        clienteService.excluir(id);
+    }
 }

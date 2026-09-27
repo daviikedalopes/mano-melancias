@@ -14,7 +14,10 @@
   }
 
   async function loadList() {
-    const params = { nome: qs('f-nome').value.trim() };
+    const params = {
+      nome: qs('f-nome').value.trim(),
+      incluirInativos: qs('f-incluir-inativos').checked ? true : undefined,
+    };
     const list = await window.Api.get('/motoristas' + window.Api.buildQuery(params));
     renderList(list);
   }
@@ -30,12 +33,20 @@
       .map(
         (m) => `
       <tr>
-        <td><span class="table__primary">${window.escapeHtml(m.nome)}</span></td>
+        <td>
+          <span class="table__primary">${window.escapeHtml(m.nome)}</span>
+          ${m.ativo ? '' : '<span class="badge badge--inativo" style="margin-left:8px;">Inativo</span>'}
+        </td>
         <td class="num">${window.Fmt.maskCpf(m.cpf)}</td>
         <td>${m.telefone ? window.escapeHtml(m.telefone) : '<span class="text-faint">—</span>'}</td>
         <td class="table__actions">
           <button class="btn btn-ghost btn-sm" type="button" data-edit="${m.id}">Editar</button>
-          <button class="btn btn-danger btn-sm" type="button" data-inativar="${m.id}">Inativar</button>
+          ${
+            m.ativo
+              ? `<button class="btn btn-danger btn-sm" type="button" data-inativar="${m.id}">Inativar</button>`
+              : `<button class="btn btn-secondary btn-sm" type="button" data-reativar="${m.id}">Reativar</button>`
+          }
+          ${window.Auth.isAdmin() ? `<button class="btn btn-danger btn-sm" type="button" data-excluir="${m.id}">Excluir</button>` : ''}
         </td>
       </tr>`
       )
@@ -47,6 +58,12 @@
     els.tbody.querySelectorAll('[data-inativar]').forEach((btn) => {
       btn.addEventListener('click', () => inativar(btn.dataset.inativar));
     });
+    els.tbody.querySelectorAll('[data-reativar]').forEach((btn) => {
+      btn.addEventListener('click', () => reativar(btn.dataset.reativar));
+    });
+    els.tbody.querySelectorAll('[data-excluir]').forEach((btn) => {
+      btn.addEventListener('click', () => excluir(btn.dataset.excluir));
+    });
   }
 
   async function inativar(id) {
@@ -57,6 +74,27 @@
       loadList();
     } catch (err) {
       window.Toast.error(err.message || 'Não foi possível inativar o motorista.');
+    }
+  }
+
+  async function excluir(id) {
+    if (!confirm('Excluir este motorista definitivamente? Essa ação não pode ser desfeita.')) return;
+    try {
+      await window.Api.del('/motoristas/' + id + '/excluir');
+      window.Toast.success('Motorista excluído.');
+      loadList();
+    } catch (err) {
+      window.Toast.error(err.message || 'Não foi possível excluir o motorista.');
+    }
+  }
+
+  async function reativar(id) {
+    try {
+      await window.Api.post('/motoristas/' + id + '/reativar');
+      window.Toast.success('Motorista reativado.');
+      loadList();
+    } catch (err) {
+      window.Toast.error(err.message || 'Não foi possível reativar o motorista.');
     }
   }
 
@@ -159,6 +197,9 @@
     els.form.addEventListener('submit', onSubmit);
     els.filterForm.addEventListener('submit', (e) => {
       e.preventDefault();
+      loadList().catch((err) => window.Toast.error(err.message || 'Erro ao buscar motoristas.'));
+    });
+    qs('f-incluir-inativos').addEventListener('change', () => {
       loadList().catch((err) => window.Toast.error(err.message || 'Erro ao buscar motoristas.'));
     });
     qs('m-cpf').addEventListener('input', (e) => {

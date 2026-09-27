@@ -1,14 +1,65 @@
 (function () {
   const qs = (id) => document.getElementById(id);
+  // Filtros do último "Gerar" bem-sucedido: o PDF sai exatamente com o que está nos cartões,
+  // mesmo que o usuário já tenha mexido nos campos sem clicar em Gerar.
+  const state = { filtroAplicado: null };
+
+  async function loadFiltros() {
+    // incluirInativos: vendas antigas podem envolver produtores/clientes já inativados.
+    const [produtores, clientes] = await Promise.all([
+      window.Api.get('/produtores?incluirInativos=true'),
+      window.Api.get('/clientes?incluirInativos=true'),
+    ]);
+    const options = (list) =>
+      list.map((x) => `<option value="${x.id}">${window.escapeHtml(x.nome)}</option>`).join('');
+    qs('f-produtor').innerHTML = '<option value="">Todos</option>' + options(produtores);
+    qs('f-cliente').innerHTML = '<option value="">Todos</option>' + options(clientes);
+  }
+
+  function filtroAtual() {
+    return {
+      inicio: qs('f-inicio').value,
+      fim: qs('f-fim').value,
+      produtorId: qs('f-produtor').value,
+      clienteId: qs('f-cliente').value,
+    };
+  }
 
   async function loadPeriodo() {
-    const inicio = qs('f-inicio').value;
-    const fim = qs('f-fim').value;
-    const data = await window.Api.get('/relatorios/vendas-periodo' + window.Api.buildQuery({ inicio, fim }));
+    const filtro = filtroAtual();
+    const data = await window.Api.get('/relatorios/vendas-periodo' + window.Api.buildQuery(filtro));
+    state.filtroAplicado = filtro;
     qs('p-qtd').textContent = window.Fmt.integer(data.quantidadeVendas || 0);
     qs('p-mercadoria').textContent = window.Fmt.currency(data.totalValorMercadoria || 0);
     qs('p-frete').textContent = window.Fmt.currency(data.totalValorFrete || 0);
     qs('p-restante').textContent = window.Fmt.currency(data.totalRestantePagar || 0);
+  }
+
+  async function baixarPdfPeriodo() {
+    if (!state.filtroAplicado) return;
+    const btn = qs('btn-periodo-pdf');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Gerando...';
+    try {
+      const blob = await window.Api.getBlob(
+        '/relatorios/vendas-periodo/pdf' + window.Api.buildQuery(state.filtroAplicado)
+      );
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    } catch (err) {
+      window.Toast.error(err.message || 'Não foi possível gerar o PDF.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
   }
 
   async function loadPorProdutor() {
@@ -99,6 +150,8 @@
       e.preventDefault();
       loadPeriodo().catch((err) => window.Toast.error(err.message || 'Erro ao gerar relatório do período.'));
     });
+    qs('btn-periodo-pdf').addEventListener('click', baixarPdfPeriodo);
+    loadFiltros().catch((err) => window.Toast.error(err.message || 'Erro ao carregar filtros.'));
     loadAll();
   }
 

@@ -30,8 +30,9 @@ public class VeiculoController {
     @GetMapping
     public List<VeiculoResponseDTO> listar(
             @RequestParam(required = false) String placa,
-            @RequestParam(required = false) UUID motoristaId) {
-        return veiculoService.buscar(placa, motoristaId).stream()
+            @RequestParam(required = false) UUID motoristaId,
+            @RequestParam(required = false, defaultValue = "false") boolean incluirInativos) {
+        return veiculoService.buscar(placa, motoristaId, incluirInativos).stream()
                 .map(VeiculoResponseDTO::from)
                 .collect(Collectors.toList());
     }
@@ -53,6 +54,17 @@ public class VeiculoController {
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void inativar(@PathVariable UUID id) {
+        veiculoService.inativar(id);
+    }
+
+    @PostMapping("/{id}/reativar")
+    public VeiculoResponseDTO reativar(@PathVariable UUID id) {
+        return VeiculoResponseDTO.from(veiculoService.reativar(id));
+    }
+
+    @DeleteMapping("/{id}/excluir")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void excluir(@PathVariable UUID id) {
         veiculoService.excluir(id);

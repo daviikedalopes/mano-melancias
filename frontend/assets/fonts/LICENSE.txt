@@ -1,0 +1,11 @@
+Fontes hospedadas localmente neste projeto:
+
+- Bevan        — https://fonts.google.com/specimen/Bevan
+- Public Sans  — https://fonts.google.com/specimen/Public+Sans
+
+Ambas são distribuídas sob a SIL Open Font License, Version 1.1
+(https://openfontlicense.org), que permite uso, cópia e redistribuição,
+inclusive em projetos comerciais.
+
+Os arquivos .woff2 são os subconjuntos "latin" e "latin-ext" servidos pelo
+Google Fonts (fonts.gstatic.com).

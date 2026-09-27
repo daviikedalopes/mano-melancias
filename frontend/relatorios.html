@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' http://localhost:8080; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relatórios · Mano Melancias</title>
   <link rel="stylesheet" href="assets/css/styles.css">
@@ -65,7 +66,16 @@
                   <label for="f-fim">Até</label>
                   <input class="input" type="date" id="f-fim">
                 </div>
+                <div class="field" style="margin-bottom:0; min-width:180px;">
+                  <label for="f-produtor">Produtor</label>
+                  <select class="select" id="f-produtor"><option value="">Todos</option></select>
+                </div>
+                <div class="field" style="margin-bottom:0; min-width:180px;">
+                  <label for="f-cliente">Cliente</label>
+                  <select class="select" id="f-cliente"><option value="">Todos</option></select>
+                </div>
                 <button type="submit" class="btn btn-primary">Gerar</button>
+                <button type="button" class="btn btn-secondary" id="btn-periodo-pdf">Gerar PDF</button>
               </form>
               <div class="grid-4">
                 <div class="stat-tile">

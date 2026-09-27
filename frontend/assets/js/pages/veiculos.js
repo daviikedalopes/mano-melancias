@@ -28,6 +28,7 @@
     const params = {
       placa: qs('f-placa').value.trim(),
       motoristaId: els.filterMotorista.value || '',
+      incluirInativos: qs('f-incluir-inativos').checked ? true : undefined,
     };
     const list = await window.Api.get('/veiculos' + window.Api.buildQuery(params));
     renderList(list);
@@ -44,12 +45,20 @@
       .map(
         (v) => `
       <tr>
-        <td><span class="table__primary num">${window.escapeHtml(v.placa)}</span></td>
+        <td>
+          <span class="table__primary num">${window.escapeHtml(v.placa)}</span>
+          ${v.ativo ? '' : '<span class="badge badge--inativo" style="margin-left:8px;">Inativo</span>'}
+        </td>
         <td>${window.escapeHtml(v.cidade)}</td>
         <td>${v.motoristaNome ? window.escapeHtml(v.motoristaNome) : '<span class="text-faint">—</span>'}</td>
         <td class="table__actions">
           <button class="btn btn-ghost btn-sm" type="button" data-edit="${v.id}">Editar</button>
-          <button class="btn btn-danger btn-sm" type="button" data-excluir="${v.id}">Excluir</button>
+          ${
+            v.ativo
+              ? `<button class="btn btn-danger btn-sm" type="button" data-inativar="${v.id}">Inativar</button>`
+              : `<button class="btn btn-secondary btn-sm" type="button" data-reativar="${v.id}">Reativar</button>`
+          }
+          ${window.Auth.isAdmin() ? `<button class="btn btn-danger btn-sm" type="button" data-excluir="${v.id}">Excluir</button>` : ''}
         </td>
       </tr>`
       )
@@ -58,19 +67,46 @@
     els.tbody.querySelectorAll('[data-edit]').forEach((btn) => {
       btn.addEventListener('click', () => openEdit(list.find((v) => v.id === btn.dataset.edit)));
     });
+    els.tbody.querySelectorAll('[data-inativar]').forEach((btn) => {
+      btn.addEventListener('click', () => inativar(btn.dataset.inativar));
+    });
+    els.tbody.querySelectorAll('[data-reativar]').forEach((btn) => {
+      btn.addEventListener('click', () => reativar(btn.dataset.reativar));
+    });
     els.tbody.querySelectorAll('[data-excluir]').forEach((btn) => {
       btn.addEventListener('click', () => excluir(btn.dataset.excluir));
     });
   }
 
+  async function inativar(id) {
+    if (!confirm('Inativar este veículo? Ele deixará de aparecer nas buscas e no lançamento de vendas.')) return;
+    try {
+      await window.Api.del('/veiculos/' + id);
+      window.Toast.success('Veículo inativado.');
+      loadList();
+    } catch (err) {
+      window.Toast.error(err.message || 'Não foi possível inativar o veículo.');
+    }
+  }
+
   async function excluir(id) {
     if (!confirm('Excluir este veículo definitivamente? Essa ação não pode ser desfeita.')) return;
     try {
-      await window.Api.del('/veiculos/' + id);
+      await window.Api.del('/veiculos/' + id + '/excluir');
       window.Toast.success('Veículo excluído.');
       loadList();
     } catch (err) {
       window.Toast.error(err.message || 'Não foi possível excluir o veículo.');
+    }
+  }
+
+  async function reativar(id) {
+    try {
+      await window.Api.post('/veiculos/' + id + '/reativar');
+      window.Toast.success('Veículo reativado.');
+      loadList();
+    } catch (err) {
+      window.Toast.error(err.message || 'Não foi possível reativar o veículo.');
     }
   }
 
@@ -165,6 +201,9 @@
     els.form.addEventListener('submit', onSubmit);
     els.filterForm.addEventListener('submit', (e) => {
       e.preventDefault();
+      loadList().catch((err) => window.Toast.error(err.message || 'Erro ao buscar veículos.'));
+    });
+    qs('f-incluir-inativos').addEventListener('change', () => {
       loadList().catch((err) => window.Toast.error(err.message || 'Erro ao buscar veículos.'));
     });
     qs('m-placa').addEventListener('input', (e) => {

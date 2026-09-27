@@ -96,6 +96,18 @@
     return papel === 'ADMIN' ? 'Administrador' : 'Operador';
   }
 
+  // Mesmas regras aplicadas no backend (SenhaForte) — checar aqui evita uma
+  // ida ao servidor só para descobrir que a senha é fraca.
+  function senhaRequisitosFaltando(senha) {
+    const valor = senha || '';
+    const faltando = [];
+    if (valor.length < 8) faltando.push('mínimo de 8 caracteres');
+    if (!/[A-Z]/.test(valor)) faltando.push('1 letra maiúscula');
+    if (!/[0-9]/.test(valor)) faltando.push('1 número');
+    if (!/[^A-Za-z0-9]/.test(valor)) faltando.push('1 caractere especial');
+    return faltando;
+  }
+
   function escapeHtml(str) {
     return String(str == null ? '' : str)
       .replace(/&/g, '&amp;')
@@ -121,5 +133,6 @@
     toNumber,
     statusLabel,
     papelLabel,
+    senhaRequisitosFaltando,
   };
 })();

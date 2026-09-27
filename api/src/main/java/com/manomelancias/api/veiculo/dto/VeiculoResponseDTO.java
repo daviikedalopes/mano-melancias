@@ -16,6 +16,7 @@ public class VeiculoResponseDTO {
     private String cidade;
     private UUID motoristaId;
     private String motoristaNome;
+    private Boolean ativo;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -26,6 +27,7 @@ public class VeiculoResponseDTO {
                 veiculo.getCidade(),
                 veiculo.getMotorista() != null ? veiculo.getMotorista().getId() : null,
                 veiculo.getMotorista() != null ? veiculo.getMotorista().getNome() : null,
+                veiculo.getAtivo(),
                 veiculo.getCreatedAt(),
                 veiculo.getUpdatedAt());
     }

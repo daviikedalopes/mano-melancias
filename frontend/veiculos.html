@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' http://localhost:8080; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Veículos · Mano Melancias</title>
   <link rel="stylesheet" href="assets/css/styles.css">
@@ -67,6 +68,13 @@
               <select class="select" id="f-motorista">
                 <option value="">Todos</option>
               </select>
+            </div>
+            <div class="field">
+              <label for="f-incluir-inativos">Status</label>
+              <label for="f-incluir-inativos" class="row" style="gap:8px; cursor:pointer; padding:10px 12px; border:1px solid var(--hairline-strong); border-radius:var(--radius-control); background:#fff;">
+                <input type="checkbox" id="f-incluir-inativos" style="accent-color:var(--rind); width:16px; height:16px;">
+                <span style="font-size:13.5px; font-weight:600;">Mostrar inativos</span>
+              </label>
             </div>
             <button type="submit" class="btn btn-secondary">Buscar</button>
           </form>

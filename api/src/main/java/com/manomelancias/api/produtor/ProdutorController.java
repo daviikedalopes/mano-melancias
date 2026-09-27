@@ -30,8 +30,9 @@ public class ProdutorController {
     @GetMapping
     public List<ProdutorResponseDTO> listar(
             @RequestParam(required = false) String nome,
-            @RequestParam(required = false) String cidade) {
-        return produtorService.buscar(nome, cidade).stream()
+            @RequestParam(required = false) String cidade,
+            @RequestParam(required = false, defaultValue = "false") boolean incluirInativos) {
+        return produtorService.buscar(nome, cidade, incluirInativos).stream()
                 .map(ProdutorResponseDTO::from)
                 .collect(Collectors.toList());
     }
@@ -56,5 +57,16 @@ public class ProdutorController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void inativar(@PathVariable UUID id) {
         produtorService.inativar(id);
+    }
+
+    @PostMapping("/{id}/reativar")
+    public ProdutorResponseDTO reativar(@PathVariable UUID id) {
+        return ProdutorResponseDTO.from(produtorService.reativar(id));
+    }
+
+    @DeleteMapping("/{id}/excluir")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void excluir(@PathVariable UUID id) {
+        produtorService.excluir(id);
     }
 }

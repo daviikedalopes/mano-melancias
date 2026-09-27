@@ -25,8 +25,8 @@ public class ProdutorService {
         return produtorRepository.findByAtivoTrue();
     }
 
-    public List<Produtor> buscar(String nome, String cidade) {
-        return produtorRepository.buscar(nome, cidade);
+    public List<Produtor> buscar(String nome, String cidade, boolean incluirInativos) {
+        return produtorRepository.buscar(nome, cidade, incluirInativos);
     }
 
     public Produtor buscarPorId(UUID id) {
@@ -54,5 +54,18 @@ public class ProdutorService {
         Produtor produtor = buscarPorId(id);
         produtor.setAtivo(false);
         produtorRepository.save(produtor);
+    }
+
+    @Transactional
+    public Produtor reativar(UUID id) {
+        Produtor produtor = buscarPorId(id);
+        produtor.setAtivo(true);
+        return produtorRepository.save(produtor);
+    }
+
+    @Transactional
+    public void excluir(UUID id) {
+        Produtor produtor = buscarPorId(id);
+        produtorRepository.delete(produtor);
     }
 }

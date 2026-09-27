@@ -14,10 +14,15 @@ public interface MotoristaRepository extends JpaRepository<Motorista, UUID> {
 
     List<Motorista> findByAtivoTrue();
 
+    /**
+     * incluirInativos = false (padrão): só motoristas ativos.
+     * incluirInativos = true: ativos e inativos juntos (ordenados com ativos primeiro).
+     */
     @Query("""
         SELECT m FROM Motorista m
-        WHERE m.ativo = true
+        WHERE (:incluirInativos = true OR m.ativo = true)
           AND (:nome IS NULL OR LOWER(m.nome) LIKE LOWER(CONCAT('%', CAST(:nome AS string), '%')))
+        ORDER BY m.ativo DESC, m.nome ASC
         """)
-    List<Motorista> buscar(@Param("nome") String nome);
+    List<Motorista> buscar(@Param("nome") String nome, @Param("incluirInativos") boolean incluirInativos);
 }

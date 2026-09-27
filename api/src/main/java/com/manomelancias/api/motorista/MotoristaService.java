@@ -41,8 +41,8 @@ public class MotoristaService {
         return motoristaRepository.findByAtivoTrue();
     }
 
-    public List<Motorista> buscar(String nome) {
-        return motoristaRepository.buscar(nome);
+    public List<Motorista> buscar(String nome, boolean incluirInativos) {
+        return motoristaRepository.buscar(nome, incluirInativos);
     }
 
     public Motorista buscarPorId(UUID id) {
@@ -76,5 +76,18 @@ public class MotoristaService {
         Motorista motorista = buscarPorId(id);
         motorista.setAtivo(false);
         motoristaRepository.save(motorista);
+    }
+
+    @Transactional
+    public Motorista reativar(UUID id) {
+        Motorista motorista = buscarPorId(id);
+        motorista.setAtivo(true);
+        return motoristaRepository.save(motorista);
+    }
+
+    @Transactional
+    public void excluir(UUID id) {
+        Motorista motorista = buscarPorId(id);
+        motoristaRepository.delete(motorista);
     }
 }

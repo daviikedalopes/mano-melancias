@@ -1,6 +1,8 @@
 (function () {
+  // BASE_URL recebendo endereço/porta da API do Spring Boot.
   const BASE_URL = window.APP_CONFIG.API_BASE_URL;
 
+  //
   class ApiError extends Error {
     constructor(status, message, erros) {
       super(message);

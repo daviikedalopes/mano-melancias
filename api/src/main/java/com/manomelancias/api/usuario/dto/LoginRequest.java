@@ -2,6 +2,7 @@ package com.manomelancias.api.usuario.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,8 +12,10 @@ public class LoginRequest {
 
     @NotBlank(message = "e-mail é obrigatório")
     @Email(message = "e-mail inválido")
+    @Size(max = 255, message = "e-mail deve ter no máximo 255 caracteres")
     private String email;
 
     @NotBlank(message = "senha é obrigatória")
+    @Size(max = 72, message = "senha deve ter no máximo 72 caracteres")
     private String senha;
 }

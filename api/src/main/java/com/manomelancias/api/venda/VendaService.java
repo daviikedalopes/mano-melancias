@@ -75,7 +75,7 @@ public class VendaService {
     }
 
     public Integer gerarNumeroSequencial() {
-        return vendaRepository.proximoNumero().intValue();
+        return vendaRepository.proximoNumero();
     }
 
     // --- CRUD ---

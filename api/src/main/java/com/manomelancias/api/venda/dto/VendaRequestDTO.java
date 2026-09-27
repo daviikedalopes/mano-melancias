@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -73,9 +74,11 @@ public class VendaRequestDTO {
 
     private LocalDate vencimento;
 
+    @Size(max = 50, message = "NF deve ter no máximo 50 caracteres")
     private String nf;
 
     private StatusPagamento statusPagamento;
 
+    @Size(max = 2000, message = "observações deve ter no máximo 2000 caracteres")
     private String observacoes;
 }

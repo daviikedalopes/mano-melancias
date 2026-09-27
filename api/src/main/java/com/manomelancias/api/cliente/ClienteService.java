@@ -73,4 +73,10 @@ public class ClienteService {
         cliente.setAtivo(true);
         return clienteRepository.save(cliente);
     }
+
+    @Transactional
+    public void excluir(UUID id) {
+        Cliente cliente = buscarPorId(id);
+        clienteRepository.delete(cliente);
+    }
 }

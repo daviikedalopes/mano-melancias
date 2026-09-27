@@ -1,5 +1,7 @@
 package com.manomelancias.api.shared.security;
 
+import com.manomelancias.api.usuario.Usuario;
+import com.manomelancias.api.usuario.UsuarioRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -19,15 +21,17 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Autentica a requisição a partir de um Bearer token JWT, sem necessidade de
- * consultar o banco a cada request: o id, e-mail e papel do usuário já vêm
- * embutidos nas claims (ver {@link JwtService#gerarToken}).
+ * Autentica a requisição a partir de um Bearer token JWT. Reconsulta o
+ * usuário no banco a cada request (em vez de confiar só nas claims) para que
+ * inativar/excluir um usuário revogue o acesso dele imediatamente, e não só
+ * quando o token expirar — e para que uma troca de papel valha na hora.
  */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UsuarioRepository usuarioRepository;
 
     @Override
     protected void doFilterInternal(
@@ -41,11 +45,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 Claims claims = jwtService.validarEExtrairClaims(token);
                 UUID usuarioId = UUID.fromString(claims.getSubject());
-                String papel = claims.get("papel", String.class);
+                Usuario usuario = usuarioRepository.findById(usuarioId).orElse(null);
 
-                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + papel));
-                var authentication = new UsernamePasswordAuthenticationToken(usuarioId, null, authorities);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (usuario != null && Boolean.TRUE.equals(usuario.getAtivo())) {
+                    List<SimpleGrantedAuthority> authorities =
+                            List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getPapel().name()));
+                    var authentication = new UsernamePasswordAuthenticationToken(usuarioId, null, authorities);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    SecurityContextHolder.clearContext();
+                }
             } catch (JwtException | IllegalArgumentException ex) {
                 SecurityContextHolder.clearContext();
             }

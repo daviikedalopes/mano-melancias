@@ -22,12 +22,68 @@
       .map(
         (u) => `
       <tr>
-        <td class="table__primary">${window.escapeHtml(u.nome)}</td>
+        <td class="table__primary">
+          ${window.escapeHtml(u.nome)}
+          ${u.ativo ? '' : '<span class="badge badge--inativo" style="margin-left:8px;">Inativo</span>'}
+        </td>
         <td>${window.escapeHtml(u.email)}</td>
         <td><span class="badge badge--${u.papel.toLowerCase()}">${window.Fmt.papelLabel(u.papel)}</span></td>
+        <td class="table__actions">${actionsFor(u)}</td>
       </tr>`
       )
       .join('');
+
+    els.tbody.querySelectorAll('[data-inativar]').forEach((btn) => {
+      btn.addEventListener('click', () => inativar(btn.dataset.inativar));
+    });
+    els.tbody.querySelectorAll('[data-reativar]').forEach((btn) => {
+      btn.addEventListener('click', () => reativar(btn.dataset.reativar));
+    });
+    els.tbody.querySelectorAll('[data-excluir]').forEach((btn) => {
+      btn.addEventListener('click', () => excluir(btn.dataset.excluir));
+    });
+  }
+
+  // Contas ADMIN não podem ser excluídas/inativadas por aqui — a API também
+  // recusa, mas nem mostramos os botões para evitar o erro previsível.
+  function actionsFor(u) {
+    if (u.papel !== 'OPERADOR') return '';
+    const toggle = u.ativo
+      ? `<button class="btn btn-ghost btn-sm" type="button" data-inativar="${u.id}">Inativar</button>`
+      : `<button class="btn btn-secondary btn-sm" type="button" data-reativar="${u.id}">Reativar</button>`;
+    return `${toggle}<button class="btn btn-danger btn-sm" type="button" data-excluir="${u.id}">Excluir</button>`;
+  }
+
+  async function inativar(id) {
+    if (!confirm('Inativar este usuário? Ele não conseguirá mais fazer login no sistema.')) return;
+    try {
+      await window.Api.post('/usuarios/' + id + '/inativar');
+      window.Toast.success('Usuário inativado.');
+      loadList();
+    } catch (err) {
+      window.Toast.error(err.message || 'Não foi possível inativar o usuário.');
+    }
+  }
+
+  async function reativar(id) {
+    try {
+      await window.Api.post('/usuarios/' + id + '/reativar');
+      window.Toast.success('Usuário reativado.');
+      loadList();
+    } catch (err) {
+      window.Toast.error(err.message || 'Não foi possível reativar o usuário.');
+    }
+  }
+
+  async function excluir(id) {
+    if (!confirm('Excluir este usuário definitivamente? Essa ação não pode ser desfeita.')) return;
+    try {
+      await window.Api.del('/usuarios/' + id);
+      window.Toast.success('Usuário excluído.');
+      loadList();
+    } catch (err) {
+      window.Toast.error(err.message || 'Não foi possível excluir o usuário.');
+    }
   }
 
   function openModal() {
@@ -63,10 +119,19 @@
   async function onSubmit(e) {
     e.preventDefault();
     clearErrors();
+
+    const senha = qs('m-senha').value;
+    const faltando = window.Fmt.senhaRequisitosFaltando(senha);
+    if (faltando.length > 0) {
+      showFieldErrors({ senha: 'Senha fraca: falta ' + faltando.join(', ') + '.' });
+      qs('m-senha').focus();
+      return;
+    }
+
     const payload = {
       nome: qs('m-nome').value.trim(),
       email: qs('m-email').value.trim(),
-      senha: qs('m-senha').value,
+      senha,
       papel: qs('m-papel').value,
     };
     els.submitBtn.disabled = true;

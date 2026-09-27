@@ -28,8 +28,10 @@ public class MotoristaController {
     private final MotoristaService motoristaService;
 
     @GetMapping
-    public List<MotoristaResponseDTO> listar(@RequestParam(required = false) String nome) {
-        return motoristaService.buscar(nome).stream()
+    public List<MotoristaResponseDTO> listar(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false, defaultValue = "false") boolean incluirInativos) {
+        return motoristaService.buscar(nome, incluirInativos).stream()
                 .map(MotoristaResponseDTO::from)
                 .collect(Collectors.toList());
     }
@@ -54,5 +56,16 @@ public class MotoristaController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void inativar(@PathVariable UUID id) {
         motoristaService.inativar(id);
+    }
+
+    @PostMapping("/{id}/reativar")
+    public MotoristaResponseDTO reativar(@PathVariable UUID id) {
+        return MotoristaResponseDTO.from(motoristaService.reativar(id));
+    }
+
+    @DeleteMapping("/{id}/excluir")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void excluir(@PathVariable UUID id) {
+        motoristaService.excluir(id);
     }
 }

@@ -48,6 +48,7 @@
               ? `<button class="btn btn-danger btn-sm" type="button" data-inativar="${c.id}">Inativar</button>`
               : `<button class="btn btn-secondary btn-sm" type="button" data-reativar="${c.id}">Reativar</button>`
           }
+          ${window.Auth.isAdmin() ? `<button class="btn btn-danger btn-sm" type="button" data-excluir="${c.id}">Excluir</button>` : ''}
         </td>
       </tr>`
       )
@@ -62,6 +63,9 @@
     els.tbody.querySelectorAll('[data-reativar]').forEach((btn) => {
       btn.addEventListener('click', () => reativar(btn.dataset.reativar));
     });
+    els.tbody.querySelectorAll('[data-excluir]').forEach((btn) => {
+      btn.addEventListener('click', () => excluir(btn.dataset.excluir));
+    });
   }
 
   async function inativar(id) {
@@ -72,6 +76,17 @@
       loadList();
     } catch (err) {
       window.Toast.error(err.message || 'Não foi possível inativar o cliente.');
+    }
+  }
+
+  async function excluir(id) {
+    if (!confirm('Excluir este cliente definitivamente? Essa ação não pode ser desfeita.')) return;
+    try {
+      await window.Api.del('/clientes/' + id + '/excluir');
+      window.Toast.success('Cliente excluído.');
+      loadList();
+    } catch (err) {
+      window.Toast.error(err.message || 'Não foi possível excluir o cliente.');
     }
   }
 

@@ -32,11 +32,12 @@ public class VeiculoService {
                                 .placa(placa.toUpperCase())
                                 .cidade(cidade)
                                 .motorista(resolverMotorista(motoristaId))
+                                .ativo(true)
                                 .build()));
     }
 
-    public List<Veiculo> buscar(String placa, UUID motoristaId) {
-        return veiculoRepository.buscar(placa, motoristaId);
+    public List<Veiculo> buscar(String placa, UUID motoristaId, boolean incluirInativos) {
+        return veiculoRepository.buscar(placa, motoristaId, incluirInativos);
     }
 
     public Veiculo buscarPorId(UUID id) {
@@ -48,6 +49,7 @@ public class VeiculoService {
     public Veiculo criar(Veiculo veiculo, UUID motoristaId) {
         veiculo.setPlaca(veiculo.getPlaca().toUpperCase());
         veiculo.setMotorista(resolverMotorista(motoristaId));
+        veiculo.setAtivo(true);
         return veiculoRepository.save(veiculo);
     }
 
@@ -61,11 +63,23 @@ public class VeiculoService {
     }
 
     @Transactional
+    public void inativar(UUID id) {
+        Veiculo veiculo = buscarPorId(id);
+        veiculo.setAtivo(false);
+        veiculoRepository.save(veiculo);
+    }
+
+    @Transactional
+    public Veiculo reativar(UUID id) {
+        Veiculo veiculo = buscarPorId(id);
+        veiculo.setAtivo(true);
+        return veiculoRepository.save(veiculo);
+    }
+
+    @Transactional
     public void excluir(UUID id) {
-        if (!veiculoRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Veículo não encontrado: " + id);
-        }
-        veiculoRepository.deleteById(id);
+        Veiculo veiculo = buscarPorId(id);
+        veiculoRepository.delete(veiculo);
     }
 
     private Motorista resolverMotorista(UUID motoristaId) {

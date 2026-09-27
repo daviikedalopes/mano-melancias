@@ -45,6 +45,10 @@ public class Usuario {
     @Column(nullable = false)
     private Papel papel;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean ativo = true;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

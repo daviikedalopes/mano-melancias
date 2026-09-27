@@ -44,6 +44,10 @@ public class Veiculo {
     @JoinColumn(name = "motorista_id")
     private Motorista motorista;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean ativo = true;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

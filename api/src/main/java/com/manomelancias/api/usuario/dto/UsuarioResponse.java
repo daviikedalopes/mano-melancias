@@ -15,8 +15,10 @@ public class UsuarioResponse {
     private String nome;
     private String email;
     private Papel papel;
+    private Boolean ativo;
 
     public static UsuarioResponse from(Usuario usuario) {
-        return new UsuarioResponse(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPapel());
+        return new UsuarioResponse(
+                usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPapel(), usuario.getAtivo());
     }
 }

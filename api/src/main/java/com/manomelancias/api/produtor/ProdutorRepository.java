@@ -14,11 +14,19 @@ public interface ProdutorRepository extends JpaRepository<Produtor, UUID> {
 
     List<Produtor> findByAtivoTrue();
 
+    /**
+     * incluirInativos = false (padrão): só produtores ativos.
+     * incluirInativos = true: ativos e inativos juntos (ordenados com ativos primeiro).
+     */
     @Query("""
         SELECT p FROM Produtor p
-        WHERE p.ativo = true
+        WHERE (:incluirInativos = true OR p.ativo = true)
           AND (:nome IS NULL OR LOWER(p.nome) LIKE LOWER(CONCAT('%', CAST(:nome AS string), '%')))
           AND (:cidade IS NULL OR LOWER(p.cidade) LIKE LOWER(CONCAT('%', CAST(:cidade AS string), '%')))
+        ORDER BY p.ativo DESC, p.nome ASC
         """)
-    List<Produtor> buscar(@Param("nome") String nome, @Param("cidade") String cidade);
+    List<Produtor> buscar(
+            @Param("nome") String nome,
+            @Param("cidade") String cidade,
+            @Param("incluirInativos") boolean incluirInativos);
 }
