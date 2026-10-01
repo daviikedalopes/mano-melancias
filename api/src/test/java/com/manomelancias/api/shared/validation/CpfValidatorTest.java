@@ -1,4 +1,4 @@
-package com.manomelancias.api.motorista;
+package com.manomelancias.api.shared.validation;
 
 import org.junit.jupiter.api.Test;
 

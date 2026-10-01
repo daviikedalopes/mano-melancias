@@ -50,9 +50,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login").permitAll()
                         .requestMatchers("/usuarios/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE,
-                                "/clientes/*/excluir", "/produtores/*/excluir",
-                                "/motoristas/*/excluir", "/veiculos/*/excluir")
+                        .requestMatchers(HttpMethod.DELETE, "/clientes/*/excluir", "/produtores/*/excluir")
                         .hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

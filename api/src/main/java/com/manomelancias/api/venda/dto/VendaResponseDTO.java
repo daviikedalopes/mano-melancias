@@ -28,12 +28,9 @@ public class VendaResponseDTO {
     private String produtorNome;
     private String produtorCidade;
 
-    private UUID motoristaId;
     private String motoristaNome;
     private String motoristaCpf;
-    private String motoristaTelefone;
 
-    private UUID veiculoId;
     private String veiculoPlaca;
     private String veiculoCidade;
 
@@ -72,13 +69,10 @@ public class VendaResponseDTO {
                 v.getProdutor().getId(),
                 v.getProdutor().getNome(),
                 v.getProdutor().getCidade(),
-                v.getMotorista().getId(),
-                v.getMotorista().getNome(),
-                v.getMotorista().getCpf(),
-                v.getMotorista().getTelefone(),
-                v.getVeiculo().getId(),
-                v.getVeiculo().getPlaca(),
-                v.getVeiculo().getCidade(),
+                v.getMotoristaNome(),
+                v.getMotoristaCpf(),
+                v.getVeiculoPlaca(),
+                v.getVeiculoCidade(),
                 v.getPesoBruto(),
                 v.getDescTara(),
                 v.getDescPalha(),

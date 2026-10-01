@@ -66,10 +66,10 @@ public class PdfService {
             document.add(tabelaFinanceiro(venda));
             document.add(espaco());
 
-            document.add(linha("Motorista", venda.getMotorista().getNome()));
-            document.add(linha("CPF", venda.getMotorista().getCpf()));
-            document.add(linha("Fone", nvl(venda.getMotorista().getTelefone())));
-            document.add(linha("Placa", venda.getVeiculo().getPlaca()));
+            document.add(linha("Motorista", venda.getMotoristaNome()));
+            document.add(linha("CPF", nvl(venda.getMotoristaCpf())));
+            document.add(linha("Placa", venda.getVeiculoPlaca()));
+            document.add(linha("Cidade (veículo)", venda.getVeiculoCidade()));
             document.add(linha("Produtor", venda.getProdutor().getNome()));
             document.add(linha("Cidade (produtor)", venda.getProdutor().getCidade()));
 

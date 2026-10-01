@@ -1,12 +1,11 @@
 package com.manomelancias.api.venda.dto;
 
 import com.manomelancias.api.cliente.dto.ClienteRequestDTO;
-import com.manomelancias.api.motorista.dto.MotoristaRequestDTO;
 import com.manomelancias.api.produtor.dto.ProdutorRequestDTO;
-import com.manomelancias.api.veiculo.dto.VeiculoRequestDTO;
 import com.manomelancias.api.venda.StatusPagamento;
 import com.manomelancias.api.venda.TipoFrete;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -19,9 +18,10 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 /**
- * Cada relação (cliente/produtor/motorista/veiculo) aceita OU um id já
- * cadastrado, OU os dados de um cadastro novo — permitindo criar "on the fly"
- * direto do formulário de venda, sem travar o fluxo de quem está lançando.
+ * Cliente e produtor aceitam OU um id já cadastrado, OU os dados de um
+ * cadastro novo — permitindo criar "on the fly" direto do formulário de
+ * venda, sem travar o fluxo de quem está lançando. Motorista e veículo não
+ * são cadastros: são só campos da própria venda.
  */
 @Getter
 @Setter
@@ -38,13 +38,20 @@ public class VendaRequestDTO {
     @Valid
     private ProdutorRequestDTO produtorNovo;
 
-    private UUID motoristaId;
-    @Valid
-    private MotoristaRequestDTO motoristaNovo;
+    @NotBlank(message = "nome do motorista é obrigatório")
+    @Size(max = 255, message = "nome do motorista deve ter no máximo 255 caracteres")
+    private String motoristaNome;
 
-    private UUID veiculoId;
-    @Valid
-    private VeiculoRequestDTO veiculoNovo;
+    @Size(max = 20, message = "CPF inválido")
+    private String motoristaCpf;
+
+    @NotBlank(message = "placa do veículo é obrigatória")
+    @Size(max = 8, message = "placa deve ter no máximo 8 caracteres")
+    private String veiculoPlaca;
+
+    @NotBlank(message = "cidade do veículo é obrigatória")
+    @Size(max = 255, message = "cidade do veículo deve ter no máximo 255 caracteres")
+    private String veiculoCidade;
 
     @NotNull(message = "peso bruto é obrigatório")
     @PositiveOrZero

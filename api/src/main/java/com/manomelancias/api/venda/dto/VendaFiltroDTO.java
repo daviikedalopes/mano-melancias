@@ -15,6 +15,6 @@ public class VendaFiltroDTO {
     private LocalDate dataFim;
     private UUID clienteId;
     private UUID produtorId;
-    private UUID motoristaId;
+    private String motorista;
     private StatusPagamento statusPagamento;
 }

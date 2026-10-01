@@ -1,10 +1,8 @@
 package com.manomelancias.api.venda;
 
 import com.manomelancias.api.cliente.Cliente;
-import com.manomelancias.api.motorista.Motorista;
 import com.manomelancias.api.produtor.Produtor;
 import com.manomelancias.api.usuario.Usuario;
-import com.manomelancias.api.veiculo.Veiculo;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -56,13 +54,18 @@ public class Venda {
     @JoinColumn(name = "produtor_id", nullable = false)
     private Produtor produtor;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "motorista_id", nullable = false)
-    private Motorista motorista;
+    // Motorista e veículo não são cadastros próprios — são só dados da venda.
+    @Column(name = "motorista_nome", nullable = false)
+    private String motoristaNome;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "veiculo_id", nullable = false)
-    private Veiculo veiculo;
+    @Column(name = "motorista_cpf", length = 11)
+    private String motoristaCpf;
+
+    @Column(name = "veiculo_placa", nullable = false, length = 8)
+    private String veiculoPlaca;
+
+    @Column(name = "veiculo_cidade", nullable = false)
+    private String veiculoCidade;
 
     // Peso bruto = peso da tara (veículo) + peso da palha + peso das frutas
     @Column(name = "peso_bruto", nullable = false, precision = 10, scale = 2)

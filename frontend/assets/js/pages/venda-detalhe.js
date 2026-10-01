@@ -42,7 +42,6 @@
 
     setText('t-motorista-nome', v.motoristaNome);
     setText('t-motorista-cpf', window.Fmt.maskCpf(v.motoristaCpf));
-    setText('t-motorista-telefone', v.motoristaTelefone);
     setText('t-veiculo-placa', v.veiculoPlaca);
     setText('t-veiculo-cidade', v.veiculoCidade);
     setText('t-produtor-nome', v.produtorNome);

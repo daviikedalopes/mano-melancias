@@ -49,5 +49,5 @@ Volte nas variáveis de ambiente do serviço de **backend** na Railway e atualiz
 ## 5. Conferir que subiu certo
 
 - Acesse a URL do frontend no navegador, faça login com um usuário existente.
-- No painel do Supabase (**Table Editor**), confirme que as tabelas (`cliente`, `produtor`, `motorista`, `veiculo`, `usuario`, `venda`) existem.
+- No painel do Supabase (**Table Editor**), confirme que as tabelas (`cliente`, `produtor`, `usuario`, `venda`) existem — motorista e veículo não são mais tabelas próprias, só colunas dentro de `venda`.
 - Abra o console do navegador (F12) e confirme que não há nenhum erro de CORS ou de CSP ("Refused to...") ao navegar pelo sistema.

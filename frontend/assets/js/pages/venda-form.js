@@ -67,7 +67,7 @@
       'f-preco-frete-kg',
     ].forEach((id) => qs(id).addEventListener('input', () => { recalc(); saveDraft(); }));
 
-    ['f-data', 'f-vencimento', 'f-nf', 'f-status', 'f-obs'].forEach((id) => {
+    ['f-data', 'f-vencimento', 'f-nf', 'f-status', 'f-obs', 'f-motorista-nome', 'f-motorista-cpf', 'f-veiculo-placa', 'f-veiculo-cidade'].forEach((id) => {
       qs(id).addEventListener('input', saveDraft);
       qs(id).addEventListener('change', saveDraft);
     });
@@ -75,6 +75,13 @@
     document.querySelectorAll('input[name="tipoFrete"]').forEach((el) =>
       el.addEventListener('change', () => { onTipoFreteChange(); saveDraft(); })
     );
+
+    qs('f-motorista-cpf').addEventListener('input', (e) => {
+      e.target.value = window.Fmt.maskCpf(e.target.value);
+    });
+    qs('f-veiculo-placa').addEventListener('input', (e) => {
+      e.target.value = window.Fmt.maskPlaca(e.target.value);
+    });
   }
 
   // ---- Rascunho automático (localStorage) ----
@@ -100,12 +107,14 @@
         nf: qs('f-nf').value,
         status: qs('f-status').value,
         obs: qs('f-obs').value,
+        motoristaNome: qs('f-motorista-nome').value,
+        motoristaCpf: qs('f-motorista-cpf').value,
+        veiculoPlaca: qs('f-veiculo-placa').value,
+        veiculoCidade: qs('f-veiculo-cidade').value,
       },
       pickers: {
         cliente: pickerSnapshot(state.pickers.cliente),
         produtor: pickerSnapshot(state.pickers.produtor),
-        motorista: pickerSnapshot(state.pickers.motorista),
-        veiculo: pickerSnapshot(state.pickers.veiculo),
       },
     };
   }
@@ -177,6 +186,10 @@
     qs('f-nf').value = f.nf || '';
     if (f.status) qs('f-status').value = f.status;
     qs('f-obs').value = f.obs || '';
+    qs('f-motorista-nome').value = f.motoristaNome || '';
+    qs('f-motorista-cpf').value = f.motoristaCpf || '';
+    qs('f-veiculo-placa').value = f.veiculoPlaca || '';
+    qs('f-veiculo-cidade').value = f.veiculoCidade || '';
 
     if (f.tipoFrete === 'POR_KG') {
       qs('f-tipo-porkg').checked = true;
@@ -185,7 +198,7 @@
     }
     onTipoFreteChange();
 
-    ['cliente', 'produtor', 'motorista', 'veiculo'].forEach((nome) => {
+    ['cliente', 'produtor'].forEach((nome) => {
       restorePicker(state.pickers[nome], draft.pickers && draft.pickers[nome]);
     });
 
@@ -225,7 +238,7 @@
     }
   }
 
-  // ---- Pickers de cliente / produtor / motorista / veículo ----
+  // ---- Pickers de cliente / produtor (motorista e veículo são campos simples) ----
   function initPickers() {
     state.pickers.cliente = new window.EntityPicker(qs('picker-cliente'), {
       onChange: saveDraft,
@@ -255,35 +268,6 @@
         { name: 'nome', label: 'Nome', required: true },
         { name: 'cidade', label: 'Cidade', required: true },
         { name: 'telefone', label: 'Telefone', required: false, mask: window.Fmt.maskPhone },
-      ],
-    });
-
-    state.pickers.motorista = new window.EntityPicker(qs('picker-motorista'), {
-      onChange: saveDraft,
-      placeholder: 'Buscar motorista por nome...',
-      newLabel: 'Cadastrar novo motorista',
-      searchFn: async (q) => {
-        const list = await window.Api.get('/motoristas' + window.Api.buildQuery({ nome: q }));
-        return list.map((m) => ({ id: m.id, title: m.nome, subtitle: window.Fmt.maskCpf(m.cpf) }));
-      },
-      newFields: [
-        { name: 'nome', label: 'Nome', required: true },
-        { name: 'cpf', label: 'CPF', required: true, maxlength: 14, mask: window.Fmt.maskCpf },
-        { name: 'telefone', label: 'Telefone', required: false, mask: window.Fmt.maskPhone },
-      ],
-    });
-
-    state.pickers.veiculo = new window.EntityPicker(qs('picker-veiculo'), {
-      onChange: saveDraft,
-      placeholder: 'Buscar veículo por placa...',
-      newLabel: 'Cadastrar novo veículo',
-      searchFn: async (q) => {
-        const list = await window.Api.get('/veiculos' + window.Api.buildQuery({ placa: q }));
-        return list.map((v) => ({ id: v.id, title: v.placa, subtitle: v.cidade }));
-      },
-      newFields: [
-        { name: 'placa', label: 'Placa', required: true, maxlength: 7, mask: window.Fmt.maskPlaca },
-        { name: 'cidade', label: 'Cidade', required: true },
       ],
     });
   }
@@ -323,6 +307,10 @@
       nf: qs('f-nf').value.trim() || null,
       statusPagamento: qs('f-status').value,
       observacoes: qs('f-obs').value.trim() || null,
+      motoristaNome: qs('f-motorista-nome').value.trim(),
+      motoristaCpf: qs('f-motorista-cpf').value.trim() || null,
+      veiculoPlaca: qs('f-veiculo-placa').value.trim(),
+      veiculoCidade: qs('f-veiculo-cidade').value.trim(),
     };
 
     if (tipoFrete === 'POR_KG') {
@@ -339,26 +327,19 @@
     if (produtorVal && produtorVal.id) payload.produtorId = produtorVal.id;
     else if (produtorVal && produtorVal.novo) payload.produtorNovo = produtorVal.novo;
 
-    const motoristaVal = state.pickers.motorista.getValue();
-    if (motoristaVal && motoristaVal.id) payload.motoristaId = motoristaVal.id;
-    else if (motoristaVal && motoristaVal.novo) payload.motoristaNovo = motoristaVal.novo;
-
-    const veiculoVal = state.pickers.veiculo.getValue();
-    if (veiculoVal && veiculoVal.id) {
-      payload.veiculoId = veiculoVal.id;
-    } else if (veiculoVal && veiculoVal.novo) {
-      payload.veiculoNovo = Object.assign({}, veiculoVal.novo);
-      if (payload.motoristaId) payload.veiculoNovo.motoristaId = payload.motoristaId;
-    }
-
-    return { payload, clienteVal, produtorVal, motoristaVal, veiculoVal };
+    return { payload, clienteVal, produtorVal };
   }
 
-  function validatePickers(clienteVal, produtorVal, motoristaVal, veiculoVal) {
+  function validateForm(clienteVal, produtorVal, payload) {
     if (!clienteVal) return 'Selecione um cliente existente ou preencha o cadastro novo.';
     if (!produtorVal) return 'Selecione um produtor existente ou preencha o cadastro novo.';
-    if (!motoristaVal) return 'Selecione um motorista existente ou preencha o cadastro novo.';
-    if (!veiculoVal) return 'Selecione um veículo existente ou preencha o cadastro novo.';
+    if (!payload.motoristaNome) return 'Informe o nome do motorista.';
+    if (payload.motoristaCpf && !window.Fmt.isValidCpf(payload.motoristaCpf)) {
+      showFieldErrors({ motoristaCpf: 'CPF inválido — confira os números digitados.' });
+      return 'Confira os campos destacados.';
+    }
+    if (!payload.veiculoPlaca) return 'Informe a placa do veículo.';
+    if (!payload.veiculoCidade) return 'Informe a cidade do veículo.';
     return null;
   }
 
@@ -366,10 +347,10 @@
     e.preventDefault();
     clearErrors();
 
-    const { payload, clienteVal, produtorVal, motoristaVal, veiculoVal } = buildPayload();
-    const pickerError = validatePickers(clienteVal, produtorVal, motoristaVal, veiculoVal);
-    if (pickerError) {
-      window.Toast.error(pickerError);
+    const { payload, clienteVal, produtorVal } = buildPayload();
+    const erro = validateForm(clienteVal, produtorVal, payload);
+    if (erro) {
+      window.Toast.error(erro);
       return;
     }
 
@@ -421,6 +402,10 @@
     qs('f-nf').value = v.nf || '';
     qs('f-status').value = v.statusPagamento;
     qs('f-obs').value = v.observacoes || '';
+    qs('f-motorista-nome').value = v.motoristaNome || '';
+    qs('f-motorista-cpf').value = v.motoristaCpf ? window.Fmt.maskCpf(v.motoristaCpf) : '';
+    qs('f-veiculo-placa').value = v.veiculoPlaca || '';
+    qs('f-veiculo-cidade').value = v.veiculoCidade || '';
 
     if (v.tipoFrete === 'POR_KG') {
       qs('f-tipo-porkg').checked = true;
@@ -436,11 +421,6 @@
       { silent: true }
     );
     state.pickers.produtor.setSelected({ id: v.produtorId, title: v.produtorNome, subtitle: v.produtorCidade }, { silent: true });
-    state.pickers.motorista.setSelected(
-      { id: v.motoristaId, title: v.motoristaNome, subtitle: window.Fmt.maskCpf(v.motoristaCpf) },
-      { silent: true }
-    );
-    state.pickers.veiculo.setSelected({ id: v.veiculoId, title: v.veiculoPlaca, subtitle: v.veiculoCidade }, { silent: true });
 
     recalc();
   }

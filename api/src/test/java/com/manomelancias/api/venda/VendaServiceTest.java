@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  */
 class VendaServiceTest {
 
-    private final VendaService vendaService = new VendaService(null, null, null, null, null, null);
+    private final VendaService vendaService = new VendaService(null, null, null, null);
 
     @Test
     void calcularPesoLiquido_deveBaterComExemploDaFicha() {

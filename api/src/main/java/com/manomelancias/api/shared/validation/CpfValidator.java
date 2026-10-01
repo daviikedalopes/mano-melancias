@@ -1,4 +1,4 @@
-package com.manomelancias.api.motorista;
+package com.manomelancias.api.shared.validation;
 
 /**
  * Validação de CPF pelo algoritmo padrão de dígitos verificadores (módulo 11).

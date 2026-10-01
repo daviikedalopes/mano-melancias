@@ -22,9 +22,9 @@ Sistema interno para uma empresa que compra melancias de produtores rurais e rev
 Dois papéis de usuário:
 
 - **ADMIN** — acesso completo: tudo que o operador faz, mais gestão de usuários e exclusão definitiva de cadastros.
-- **OPERADOR** — lança e gerencia vendas e cadastros do dia a dia (clientes, produtores, motoristas, veículos), mas não gerencia usuários nem exclui nada definitivamente.
+- **OPERADOR** — lança e gerencia vendas e cadastros do dia a dia (clientes, produtores), mas não gerencia usuários nem exclui nada definitivamente.
 
-O fluxo central do sistema é a **venda**: um carregamento de melancia comprado de um produtor, transportado por um motorista/veículo, entregue e faturado a um cliente.
+O fluxo central do sistema é a **venda**: um carregamento de melancia comprado de um produtor, transportado por um motorista num veículo, entregue e faturado a um cliente. Motorista e veículo não são cadastros — são só campos preenchidos na própria venda (ver [Venda](#venda--o-núcleo-do-sistema)).
 
 ## Arquitetura
 
@@ -41,9 +41,9 @@ O frontend é uma página HTML por tela (sem roteamento client-side); cada uma c
 
 ## Domínio e regras de negócio
 
-Quatro entidades de cadastro (**Cliente**, **Produtor**, **Motorista**, **Veículo**) seguem o mesmo padrão:
+Duas entidades de cadastro (**Cliente**, **Produtor**) seguem o mesmo padrão:
 
-- Podem ser criadas diretamente pela tela de cadastro, ou **"on the fly"** direto do formulário de venda — o operador digita os dados de quem ainda não existe e o sistema cria o registro na hora (`buscarOuCriar`, casado por um campo natural: nome+município+estado para cliente, nome+cidade para produtor, CPF normalizado para motorista, placa para veículo).
+- Podem ser criadas diretamente pela tela de cadastro, ou **"on the fly"** direto do formulário de venda — o operador digita os dados de quem ainda não existe e o sistema cria o registro na hora (`buscarOuCriar`, casado por um campo natural: nome+município+estado para cliente, nome+cidade para produtor).
 - Têm um campo `ativo` (soft delete): **inativar** (`DELETE /{recurso}/{id}`) tira o registro das buscas padrão e do seletor de vendas, sem apagar o histórico; **reativar** desfaz. Qualquer usuário autenticado pode inativar/reativar.
 - Têm **exclusão definitiva** (`DELETE /{recurso}/{id}/excluir`), **restrita a ADMIN**. Se o registro tiver vendas vinculadas, a exclusão falha (409) por violação de chave estrangeira — o sistema não deixa apagar algo referenciado em uma venda.
 
@@ -55,13 +55,9 @@ Campos: nome, município, estado (UF, 2 letras), telefone (opcional). Validaçã
 
 Campos: nome, cidade, telefone (opcional). Mesmos limites de tamanho do Cliente.
 
-### Motorista
+### Motorista e veículo não são cadastros
 
-Campos: nome, CPF (único), telefone (opcional). O CPF é validado de verdade pelo algoritmo de dígito verificador (módulo 11, classe `CpfValidator`) — não é só checagem de formato — e normalizado (só dígitos) antes de salvar.
-
-### Veículo
-
-Campos: placa (única, até 8 caracteres — aceita o padrão Mercosul), cidade, motorista vinculado (opcional). Historicamente era o único dos quatro sem soft-delete (excluía direto); foi padronizado para `ativo`/inativar/reativar/excluir junto com os demais.
+Diferente de cliente e produtor, motorista e veículo **não têm tela própria nem histórico independente** — são só campos preenchidos em cada venda (sem busca, sem id, sem soft-delete). Isso foi uma decisão deliberada: cadastrar motorista/veículo antes de cada venda dava mais trabalho do que valia, já que a empresa lida com motoristas avulsos/terceirizados com frequência. Ver as regras exatas em [Venda](#venda--o-núcleo-do-sistema).
 
 ### Usuário
 
@@ -79,6 +75,12 @@ Campos: placa (única, até 8 caracteres — aceita o padrão Mercosul), cidade,
 Uma venda liga cliente, produtor, motorista e veículo, e registra pesagem, preço, frete e pagamento.
 
 **Campos:** data, cliente, produtor, motorista, veículo, peso bruto, desconto de tara, desconto de palha, total de frutas, preço/kg, tipo de frete (`NEGOCIADO` ou `POR_KG`), preço do frete/kg ou valor de frete negociado, vencimento, NF, status de pagamento (`PENDENTE`, `PAGO_PARCIAL`, `PAGO`), observações.
+
+**Motorista e veículo** são só campos de texto da própria venda, preenchidos na hora, sem cadastro prévio:
+- Nome do motorista: obrigatório.
+- CPF do motorista: **opcional**, mas se for informado precisa ser um CPF de verdade (dígito verificador validado) — não passa qualquer sequência de números.
+- Placa e cidade do veículo: **ambos obrigatórios**.
+- Nada disso tem unicidade nem histórico próprio: o mesmo motorista/placa aparece livremente em quantas vendas quiser, já que não é mais um cadastro com id.
 
 **Cálculos** (feitos no backend, `VendaService`, cobertos por testes com números reais conferidos numa ficha de venda em papel):
 
@@ -107,7 +109,7 @@ Exemplo conferido: peso bruto 31.180 kg, tara 11.300 kg, palha 400 kg → líqui
 ## Segurança
 
 - **Autenticação**: JWT assinado com HMAC (`app.jwt.secret`, sobrescrevível pela variável de ambiente `JWT_SECRET` em produção — nunca deve usar o valor padrão de desenvolvimento fora do ambiente local).
-- **Autorização**: `/usuarios/**` e as rotas `.../excluir` de cliente/produtor/motorista/veículo exigem papel `ADMIN`; o restante exige apenas estar autenticado.
+- **Autorização**: `/usuarios/**` e as rotas `.../excluir` de cliente/produtor exigem papel `ADMIN`; o restante exige apenas estar autenticado.
 - **CORS**: restrito às origens listadas em `app.cors.allowed-origins` (sobrescrevível por `CORS_ALLOWED_ORIGINS`).
 - **Headers HTTP**: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` e `HSTS` configurados explicitamente no backend; `Content-Security-Policy` aplicada via `<meta>` em cada página do frontend, restrita a `'self'` (as fontes do site são hospedadas localmente, não vêm do Google Fonts).
 - **Validação de entrada**: Bean Validation em todos os DTOs de request, com limites de tamanho alinhados às colunas do banco (evita tanto erro feio de truncamento quanto payloads gigantes).
@@ -119,23 +121,22 @@ Exemplo conferido: peso bruto 31.180 kg, tara 11.300 kg, palha 400 kg → líqui
 com.manomelancias.api/
 ├── cliente/     Cliente, ClienteController, ClienteService, ClienteRepository, dto/
 ├── produtor/    (mesmo padrão do cliente)
-├── motorista/   (mesmo padrão) + CpfValidator
-├── veiculo/     (mesmo padrão)
 ├── usuario/     Usuario, Papel, UsuarioController, UsuarioService, UsuarioRepository
 │                dto/ LoginRequest, LoginResponse, UsuarioRequest, UsuarioResponse
-├── venda/       Venda, TipoFrete, StatusPagamento, VendaController, VendaService, VendaRepository
+├── venda/       Venda (inclui motorista/veículo como campos), TipoFrete, StatusPagamento,
+│                VendaController, VendaService, VendaRepository
 │                dto/ VendaRequestDTO, VendaResponseDTO, VendaFiltroDTO
 ├── relatorio/   RelatorioController, RelatorioService
 │                dto/ ClienteRelatorioDTO, ProdutorRelatorioDTO, ContaReceberDTO, VendasPeriodoResponseDTO
 └── shared/
     ├── config/      SecurityConfig
     ├── security/    JwtService, JwtAuthenticationFilter, LoginRateLimiter
-    ├── validation/  ValidEmail + EmailDomainValidator, SenhaForte + PasswordStrengthValidator
+    ├── validation/  ValidEmail + EmailDomainValidator, SenhaForte + PasswordStrengthValidator, CpfValidator
     ├── exception/   BusinessException, ResourceNotFoundException, GlobalExceptionHandler
     └── pdf/         PdfService
 ```
 
-Padrão repetido nas quatro entidades de cadastro: **Controller** (REST) → **Service** (regra de negócio) → **Repository** (Spring Data JPA) → **Entity**. DTOs de request/response separam o que a API aceita e expõe do modelo interno.
+Padrão repetido nas duas entidades de cadastro: **Controller** (REST) → **Service** (regra de negócio) → **Repository** (Spring Data JPA) → **Entity**. DTOs de request/response separam o que a API aceita e expõe do modelo interno.
 
 ### Endpoints
 
@@ -143,8 +144,6 @@ Padrão repetido nas quatro entidades de cadastro: **Controller** (REST) → **S
 |---|---|
 | Cliente | `GET/POST /clientes`, `GET/PUT /clientes/{id}`, `DELETE /clientes/{id}` (inativar), `POST /clientes/{id}/reativar`, `DELETE /clientes/{id}/excluir` (admin) |
 | Produtor | mesmo padrão em `/produtores` |
-| Motorista | mesmo padrão em `/motoristas` |
-| Veículo | mesmo padrão em `/veiculos` |
 | Usuário | `POST /auth/login`, `POST/GET /usuarios` (admin), `DELETE /usuarios/{id}` (excluir, admin), `POST /usuarios/{id}/inativar`, `POST /usuarios/{id}/reativar` |
 | Venda | `GET/POST /vendas`, `GET/PUT /vendas/{id}`, `DELETE /vendas/{id}`, `GET /vendas/{id}/pdf` |
 | Relatórios | `GET /relatorios/vendas-periodo`, `GET /relatorios/vendas-periodo/pdf`, `GET /relatorios/por-produtor`, `GET /relatorios/por-cliente`, `GET /relatorios/contas-a-receber` |
@@ -160,14 +159,14 @@ Cada tela é um `.html` independente, com seu próprio script em `assets/js/page
 | `format.js` | Máscaras (CPF, telefone, placa), formatação de moeda/data no padrão BR |
 | `toast.js` | Notificações de sucesso/erro |
 | `confirm-modal.js` | Modal de confirmação do próprio sistema (não usa `confirm()` nativo do navegador) |
-| `entity-picker.js` | Busca/seleciona/cria cliente, produtor, motorista ou veículo dentro do formulário de venda |
+| `entity-picker.js` | Busca/seleciona/cria cliente ou produtor dentro do formulário de venda |
 | `shell.js` | Sidebar, boot de autenticação, controle de acesso das páginas admin-only |
 
-Páginas: `login`, `index` (painel), `vendas`, `venda-form`, `venda-detalhe`, `clientes`, `produtores`, `motoristas`, `veiculos`, `usuarios` (admin only), `relatorios`.
+Páginas: `login`, `index` (painel), `vendas`, `venda-form`, `venda-detalhe`, `clientes`, `produtores`, `usuarios` (admin only), `relatorios`. Motorista e veículo não têm tela de cadastro — só aparecem como campos dentro de `venda-form`.
 
 ## Banco de dados
 
-PostgreSQL, com 9 migrações Flyway (`api/src/main/resources/db/migration`):
+PostgreSQL, com 10 migrações Flyway (`api/src/main/resources/db/migration`):
 
 | Migração | O que faz |
 |---|---|
@@ -175,12 +174,13 @@ PostgreSQL, com 9 migrações Flyway (`api/src/main/resources/db/migration`):
 | V7 | Adiciona `ativo` em veiculo (padroniza o soft-delete) |
 | V8 | Adiciona `ativo` em usuario |
 | V9 | Remove a sequence de numeração de venda (substituída pela lógica de menor lacuna livre) |
+| V10 | Motorista e veículo deixam de ser tabelas: os dados existentes são copiados para novas colunas em `venda` (`motorista_nome`, `motorista_cpf`, `veiculo_placa`, `veiculo_cidade`) antes de as tabelas `motorista` e `veiculo` serem removidas — nenhum histórico é perdido |
 
 ## Casos de uso principais
 
 1. **Login** — e-mail + senha → JWT. Bloqueio após 5 tentativas erradas seguidas.
-2. **Cadastro de participante** — direto na tela do recurso, ou on-the-fly durante o lançamento de uma venda.
-3. **Lançamento de venda** — escolhe/cadastra os quatro participantes, informa pesagem/preço/frete, o sistema calcula os valores.
+2. **Cadastro de cliente/produtor** — direto na tela do recurso, ou on-the-fly durante o lançamento de uma venda.
+3. **Lançamento de venda** — escolhe/cadastra cliente e produtor, digita motorista e veículo na hora, informa pesagem/preço/frete, o sistema calcula os valores.
 4. **Edição de venda** — recalcula os valores a partir dos novos dados.
 5. **Baixa de pagamento** — muda o status (`PENDENTE` → `PAGO_PARCIAL` → `PAGO`).
 6. **Geração de PDF** — recibo de uma venda, ou relatório de vendas por período.
@@ -193,7 +193,8 @@ PostgreSQL, com 9 migrações Flyway (`api/src/main/resources/db/migration`):
 Documentadas de propósito, para não passar a impressão de que o sistema cobre tudo:
 
 - Qualquer usuário autenticado pode editar ou excluir vendas lançadas por outro usuário — não há checagem de "dono do registro".
-- O CPF do motorista fica em texto puro no banco (sem criptografia em repouso).
+- O CPF do motorista fica em texto puro no banco (sem criptografia em repouso), agora como campo da própria venda.
+- Motorista e veículo, por não serem mais cadastros, não têm soft-delete/histórico próprio nem impedem nomes/placas duplicados ou digitados de forma inconsistente entre vendas diferentes (ex.: "Tiago" numa venda e "Tiago Souza" noutra não são reconhecidos como a mesma pessoa).
 - O reaproveitamento do número de venda tem uma janela de corrida rara: duas vendas salvas no exato mesmo instante podem competir pelo mesmo número (uma falha e precisa tentar de novo).
 - O rascunho de venda salvo no navegador (localStorage) não expira sozinho.
 - O bloqueio de login por tentativas é em memória: reseta se a aplicação reiniciar e não é compartilhado entre múltiplas instâncias.

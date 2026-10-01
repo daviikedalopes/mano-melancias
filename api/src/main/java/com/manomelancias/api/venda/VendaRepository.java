@@ -31,8 +31,6 @@ public interface VendaRepository extends JpaRepository<Venda, UUID> {
         SELECT v FROM Venda v
         LEFT JOIN FETCH v.cliente
         LEFT JOIN FETCH v.produtor
-        LEFT JOIN FETCH v.motorista
-        LEFT JOIN FETCH v.veiculo
         LEFT JOIN FETCH v.createdBy
         WHERE v.id = :id
         """)
@@ -42,14 +40,12 @@ public interface VendaRepository extends JpaRepository<Venda, UUID> {
         SELECT v FROM Venda v
         LEFT JOIN FETCH v.cliente
         LEFT JOIN FETCH v.produtor
-        LEFT JOIN FETCH v.motorista
-        LEFT JOIN FETCH v.veiculo
         LEFT JOIN FETCH v.createdBy
         WHERE (CAST(:dataInicio AS LocalDate) IS NULL OR v.dataVenda >= :dataInicio)
           AND (CAST(:dataFim AS LocalDate) IS NULL OR v.dataVenda <= :dataFim)
           AND (:clienteId IS NULL OR v.cliente.id = :clienteId)
           AND (:produtorId IS NULL OR v.produtor.id = :produtorId)
-          AND (:motoristaId IS NULL OR v.motorista.id = :motoristaId)
+          AND (:motorista IS NULL OR LOWER(v.motoristaNome) LIKE LOWER(CONCAT('%', CAST(:motorista AS string), '%')))
           AND (:statusPagamento IS NULL OR v.statusPagamento = :statusPagamento)
         ORDER BY v.dataVenda DESC, v.numero DESC
         """)
@@ -58,7 +54,7 @@ public interface VendaRepository extends JpaRepository<Venda, UUID> {
             @Param("dataFim") LocalDate dataFim,
             @Param("clienteId") UUID clienteId,
             @Param("produtorId") UUID produtorId,
-            @Param("motoristaId") UUID motoristaId,
+            @Param("motorista") String motorista,
             @Param("statusPagamento") StatusPagamento statusPagamento);
 
     // --- Relatórios (usados por RelatorioService, que não tem repository próprio) ---

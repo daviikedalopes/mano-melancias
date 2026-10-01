@@ -3,19 +3,14 @@ package com.manomelancias.api.venda;
 import com.manomelancias.api.cliente.Cliente;
 import com.manomelancias.api.cliente.ClienteService;
 import com.manomelancias.api.cliente.dto.ClienteRequestDTO;
-import com.manomelancias.api.motorista.Motorista;
-import com.manomelancias.api.motorista.MotoristaService;
-import com.manomelancias.api.motorista.dto.MotoristaRequestDTO;
 import com.manomelancias.api.produtor.Produtor;
 import com.manomelancias.api.produtor.ProdutorService;
 import com.manomelancias.api.produtor.dto.ProdutorRequestDTO;
 import com.manomelancias.api.shared.exception.BusinessException;
 import com.manomelancias.api.shared.exception.ResourceNotFoundException;
+import com.manomelancias.api.shared.validation.CpfValidator;
 import com.manomelancias.api.usuario.Usuario;
 import com.manomelancias.api.usuario.UsuarioRepository;
-import com.manomelancias.api.veiculo.Veiculo;
-import com.manomelancias.api.veiculo.VeiculoService;
-import com.manomelancias.api.veiculo.dto.VeiculoRequestDTO;
 import com.manomelancias.api.venda.dto.VendaFiltroDTO;
 import com.manomelancias.api.venda.dto.VendaRequestDTO;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +33,6 @@ public class VendaService {
     private final VendaRepository vendaRepository;
     private final ClienteService clienteService;
     private final ProdutorService produtorService;
-    private final MotoristaService motoristaService;
-    private final VeiculoService veiculoService;
     private final UsuarioRepository usuarioRepository;
 
     // --- Regras de cálculo (seção 3 do documento de arquitetura) ---
@@ -91,7 +84,7 @@ public class VendaService {
                 filtro.getDataFim(),
                 filtro.getClienteId(),
                 filtro.getProdutorId(),
-                filtro.getMotoristaId(),
+                filtro.getMotorista(),
                 filtro.getStatusPagamento());
     }
 
@@ -123,8 +116,10 @@ public class VendaService {
         venda.setDataVenda(dto.getDataVenda());
         venda.setCliente(resolverCliente(dto));
         venda.setProdutor(resolverProdutor(dto));
-        venda.setMotorista(resolverMotorista(dto));
-        venda.setVeiculo(resolverVeiculo(dto));
+        venda.setMotoristaNome(dto.getMotoristaNome().trim());
+        venda.setMotoristaCpf(normalizarCpfOpcional(dto.getMotoristaCpf()));
+        venda.setVeiculoPlaca(dto.getVeiculoPlaca().trim().toUpperCase());
+        venda.setVeiculoCidade(dto.getVeiculoCidade().trim());
 
         BigDecimal descPalha = dto.getDescPalha() != null ? dto.getDescPalha() : BigDecimal.ZERO;
         BigDecimal pesoLiquido = calcularPesoLiquido(dto.getPesoBruto(), dto.getDescTara(), descPalha);
@@ -173,26 +168,19 @@ public class VendaService {
         throw new BusinessException("produtor é obrigatório: informe produtorId ou produtorNovo");
     }
 
-    private Motorista resolverMotorista(VendaRequestDTO dto) {
-        if (dto.getMotoristaId() != null) {
-            return motoristaService.buscarPorId(dto.getMotoristaId());
+    /**
+     * O CPF do motorista é opcional na venda, mas se for informado precisa
+     * ser um CPF de verdade (dígito verificador), não só um texto qualquer.
+     */
+    private String normalizarCpfOpcional(String cpf) {
+        if (cpf == null || cpf.isBlank()) {
+            return null;
         }
-        MotoristaRequestDTO novo = dto.getMotoristaNovo();
-        if (novo != null) {
-            return motoristaService.buscarOuCriar(novo.getNome(), novo.getCpf(), novo.getTelefone());
+        String normalizado = CpfValidator.normalizar(cpf);
+        if (!CpfValidator.isValid(normalizado)) {
+            throw new BusinessException("CPF do motorista inválido: " + cpf);
         }
-        throw new BusinessException("motorista é obrigatório: informe motoristaId ou motoristaNovo");
-    }
-
-    private Veiculo resolverVeiculo(VendaRequestDTO dto) {
-        if (dto.getVeiculoId() != null) {
-            return veiculoService.buscarPorId(dto.getVeiculoId());
-        }
-        VeiculoRequestDTO novo = dto.getVeiculoNovo();
-        if (novo != null) {
-            return veiculoService.buscarOuCriar(novo.getPlaca(), novo.getCidade(), novo.getMotoristaId());
-        }
-        throw new BusinessException("veículo é obrigatório: informe veiculoId ou veiculoNovo");
+        return normalizado;
     }
 
     private Usuario usuarioAutenticado() {

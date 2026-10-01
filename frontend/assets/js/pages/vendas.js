@@ -12,10 +12,9 @@
   }
 
   async function loadFiltroOptions() {
-    const [clientes, produtores, motoristas] = await Promise.all([
+    const [clientes, produtores] = await Promise.all([
       window.Api.get('/clientes'),
       window.Api.get('/produtores'),
-      window.Api.get('/motoristas'),
     ]);
     els.cliente.innerHTML =
       '<option value="">Todos</option>' +
@@ -23,9 +22,6 @@
     els.produtor.innerHTML =
       '<option value="">Todos</option>' +
       produtores.map((p) => `<option value="${p.id}">${window.escapeHtml(p.nome)}</option>`).join('');
-    els.motorista.innerHTML =
-      '<option value="">Todos</option>' +
-      motoristas.map((m) => `<option value="${m.id}">${window.escapeHtml(m.nome)}</option>`).join('');
   }
 
   async function loadList() {
@@ -34,7 +30,7 @@
       dataFim: qs('f-fim').value,
       clienteId: els.cliente.value,
       produtorId: els.produtor.value,
-      motoristaId: els.motorista.value,
+      motorista: els.motorista.value.trim(),
       statusPagamento: qs('f-status').value,
     };
     const list = await window.Api.get('/vendas' + window.Api.buildQuery(params));
