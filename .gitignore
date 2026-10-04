@@ -1,0 +1,4 @@
+# Arquivos de variáveis de ambiente (contêm segredos) — nunca versionar
+.env
+*.env
+!*.env.example

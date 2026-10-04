@@ -1,0 +1,33 @@
+# Configuração base, sem segredos — pode ser versionada.
+# Tudo que é sensível vem de variáveis de ambiente (ver DEPLOY.md).
+# Localmente, o application.properties (ignorado pelo git) tem precedência sobre este arquivo.
+spring:
+  application:
+    name: api
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: America/Sao_Paulo
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: ${PORT:8080}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:480}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
