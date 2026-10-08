@@ -1,53 +1,116 @@
-# Deploy — Mano Melancias
+# Deploy — Mano Melancias (VPS + Docker)
 
-Backend e frontend na Railway (dois serviços no mesmo projeto), banco no Supabase.
+Tudo roda num único servidor (VPS, ex.: Hostinger) com Docker Compose, na pasta [`deploy/`](deploy/):
 
-## 1. Banco de dados (Supabase)
+```
+Internet ──443──► caddy ──/api/*──► api (Spring Boot) ──► db (PostgreSQL)
+                    └── demais caminhos: arquivos do frontend/
+```
 
-1. Crie um projeto no [Supabase](https://supabase.com) (escolha a região mais próxima, ex. São Paulo).
-2. Anote a senha do banco definida na criação do projeto.
-3. No painel do projeto, vá em **Project Settings → Database → Connection string** e use a opção de **conexão direta** (porta `5432`), não o pooler de "Transaction mode" (porta `6543`) — o backend já mantém seu próprio pool de conexões (HikariCP) e misturar os dois causa erro de prepared statement.
-4. A URL fica no formato:
-   ```
-   jdbc:postgresql://db.<project-ref>.supabase.co:5432/postgres?sslmode=require
-   ```
-5. Não é preciso criar tabelas manualmente — o Flyway aplica as migrações (V1 a V8) sozinho no primeiro boot do backend.
+- **caddy**: HTTPS automático (Let's Encrypt), serve o frontend e repassa `/api/*` ao backend (removendo o prefixo `/api`).
+- **api**: construído a partir do [`api/Dockerfile`](api/Dockerfile), com a memória da JVM limitada.
+- **db**: PostgreSQL com volume persistente, **sem porta exposta** na internet.
 
-**Atenção (plano gratuito):** o projeto pausa automaticamente depois de ~1 semana sem acesso. Para reativar: painel do Supabase → o projeto aparece como "Paused" → botão **Restore project**. O sistema volta a funcionar poucos minutos depois.
+Frontend e API ficam no mesmo domínio, então **não há CORS** nem URL de backend para configurar: o `config.js` usa `/api` em qualquer domínio que não seja `localhost`.
 
-## 2. Backend (Railway)
+## Como funciona o banco de dados e as migrações
 
-1. Crie um projeto na [Railway](https://railway.app) e adicione um serviço a partir do repositório GitHub, apontando para a pasta `api/` (ela tem um `Dockerfile` — a Railway detecta e usa ele automaticamente).
-2. Configure as variáveis de ambiente do serviço:
+- **Você não precisa criar tabelas.** O container `db` cria um banco **vazio** (`manomelancias`) na primeira vez que sobe.
+- Quando o backend inicia, o **Flyway** olha a pasta `api/src/main/resources/db/migration/` (arquivos `V1`, `V2`, … `V10`) e roda, em ordem, os que ainda não foram aplicados. Ele anota o que já rodou numa tabela própria (`flyway_schema_history`). No primeiro boot roda tudo (V1 a V10); nos próximos, só as migrações **novas**.
+- Para mudar o banco no futuro, crie um arquivo novo (`V11__descricao.sql`), faça `git pull` no servidor e `docker compose up -d --build`: a migração roda sozinha. **Nunca edite** uma migração que já foi aplicada.
+- O banco do seu computador **não vai junto** — são bancos separados. O do servidor nasce vazio e sem usuários (veja o passo "Primeiro administrador"). Se quiser levar os dados que já tem localmente, veja "Levar o banco local" mais abaixo.
+- Os dados ficam no volume Docker `pgdata`: sobrevivem a reinício, a `docker compose down` e a atualizações. Só somem com `docker compose down -v`, **nunca use `-v` em produção**.
 
-   | Variável | Valor |
-   |---|---|
-   | `SPRING_PROFILES_ACTIVE` | `prod` |
-   | `DATABASE_URL` | a connection string direta do Supabase (passo 1.4) |
-   | `DATABASE_USERNAME` | `postgres` |
-   | `DATABASE_PASSWORD` | a senha do banco definida no Supabase |
-   | `JWT_SECRET` | um valor novo e forte — gere com `openssl rand -base64 48`. **Não reaproveite** o segredo de desenvolvimento que existe no `application.properties`. |
-   | `CORS_ALLOWED_ORIGINS` | por enquanto, qualquer placeholder (ex. `http://localhost`) — volte aqui depois do passo 3 |
+## 1. Servidor (Hostinger ou outro)
 
-3. Faça o deploy e anote a URL pública que a Railway atribui ao serviço (ex. `https://api-mano-melancias.up.railway.app`).
-4. Teste rapidamente: `curl https://<url-do-backend>/auth/login` deve responder (mesmo que com erro de validação, confirma que subiu).
+- Plano de VPS com **2 GB de RAM ou mais**, em data center no **Brasil** se disponível (confira no checkout). Sistema: **Ubuntu 24.04 com Docker** (a Hostinger oferece esse modelo ao criar o VPS) ou Ubuntu LTS puro.
+- Acesse por SSH (`ssh root@IP_DO_SERVIDOR`), de preferência com chave SSH.
+- Firewall liberando só `22`, `80` e `443`:
+  ```bash
+  ufw allow 22/tcp && ufw allow 80/tcp && ufw allow 443/tcp && ufw allow 443/udp && ufw enable
+  ```
+- Se tiver 2 GB, crie swap (o build do Maven usa bastante memória):
+  ```bash
+  fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+  echo '/swapfile none swap sw 0 0' >> /etc/fstab
+  ```
+- Se o Docker não veio instalado: `curl -fsSL https://get.docker.com | sh`.
 
-## 3. Frontend (Railway)
+## 2. Domínio
 
-1. No mesmo projeto Railway, adicione outro serviço apontando para a pasta `frontend/` (também tem `Dockerfile`, nginx servindo os arquivos estáticos).
-2. **Antes de fazer o deploy**, atualize no código a URL do backend (feito no passo 2.3):
-   - `frontend/assets/js/config.js` → `API_BASE_URL`.
-   - O `connect-src` da tag `<meta http-equiv="Content-Security-Policy">` em todas as páginas HTML de `frontend/` (são 11 arquivos).
-   
-   Commite essa alteração antes do deploy do frontend.
-3. Faça o deploy e anote a URL pública do frontend (ex. `https://app-mano-melancias.up.railway.app`).
+Registre um domínio (`.com.br` custa cerca de R$ 40/ano) e crie um registro **A** apontando para o IP do servidor. Para testar sem domínio, use `IP-COM-TRACOS.sslip.io` (ex.: `203-0-113-5.sslip.io`): o Caddy emite o certificado normalmente.
 
-## 4. Fechar o CORS
+## 3. Subir o sistema
 
-Volte nas variáveis de ambiente do serviço de **backend** na Railway e atualize `CORS_ALLOWED_ORIGINS` com a URL real do frontend (passo 3.3). A Railway reinicia o serviço automaticamente.
+```bash
+git clone https://github.com/daviikedalopes/mano-melancias.git
+cd mano-melancias/deploy
+cp .env.example .env
+nano .env        # preencha DOMINIO, POSTGRES_PASSWORD e JWT_SECRET
+docker compose up -d --build
+docker compose logs -f api     # espere "Started ApiApplication"; Ctrl+C sai dos logs
+```
 
-## 5. Conferir que subiu certo
+Gere os segredos com `openssl rand -hex 24` (senha do banco) e `openssl rand -hex 48` (`JWT_SECRET`). O `.env` fica só no servidor e nunca vai para o git. O primeiro boot demora alguns minutos (build do Maven).
 
-- Acesse a URL do frontend no navegador, faça login com um usuário existente.
-- No painel do Supabase (**Table Editor**), confirme que as tabelas (`cliente`, `produtor`, `usuario`, `venda`) existem — motorista e veículo não são mais tabelas próprias, só colunas dentro de `venda`.
-- Abra o console do navegador (F12) e confirme que não há nenhum erro de CORS ou de CSP ("Refused to...") ao navegar pelo sistema.
+## 4. Primeiro administrador
+
+O banco começa sem usuários e só um admin logado cria outros, então o primeiro entra direto no banco. Gere o hash BCrypt da senha (precisa de 8+ caracteres, com maiúscula, número e caractere especial):
+
+```bash
+apt install -y apache2-utils
+htpasswd -bnBC 10 "" 'SUA_SENHA' | tr -d ':\n'
+```
+
+Copie o resultado (começa com `$2y$`, que o Spring aceita) e rode, trocando e-mail e hash:
+
+```bash
+docker compose exec db psql -U manomelancias_user manomelancias -c \
+"INSERT INTO usuario (id, nome, email, senha_hash, papel, ativo)
+ VALUES (gen_random_uuid(), 'Administrador', 'seu@email.com.br', 'COLE_O_HASH_AQUI', 'ADMIN', TRUE);"
+```
+
+Depois entre no sistema e crie os demais usuários pela tela **Usuários**.
+
+## 5. Backup (não pule)
+
+```bash
+chmod +x backup.sh
+crontab -e   # adicione:  0 3 * * * /root/mano-melancias/deploy/backup.sh >> /var/log/mano-backup.log 2>&1
+```
+
+O script grava um `.sql.gz` por dia em `deploy/backups/` (guarda 14 dias). Para ter uma cópia **fora do servidor**, configure o [rclone](https://rclone.org) com um bucket gratuito (Cloudflare R2 ou Backblaze B2) e defina `BACKUP_RCLONE_REMOTE` no `.env`. **Teste um restore ao menos uma vez** (comando no cabeçalho do `backup.sh`).
+
+## 6. Atualizar o sistema
+
+```bash
+cd mano-melancias && git pull && cd deploy && docker compose up -d --build
+```
+
+Migrações novas rodam sozinhas no boot.
+
+## 7. Conferir
+
+- `https://SEU_DOMINIO` abre a tela de login; entre com o admin.
+- `curl -i https://SEU_DOMINIO/api/auth/login` responde 4xx do backend (não 404 do Caddy).
+- A porta 5432 do IP público **não** pode responder.
+- Reinicie o servidor e confirme que os containers voltam sozinhos e os dados continuam lá.
+- Console do navegador (F12) sem erros de CSP ou rede.
+
+Dica: cadastre o domínio num monitor gratuito (UptimeRobot) para ser avisado se cair.
+
+## Levar o banco local (opcional)
+
+Só se você quiser os dados que já tem no seu computador. Faça **antes** do primeiro `docker compose up` da API (ou com a API parada), com o banco do servidor ainda vazio:
+
+```bash
+# No seu computador (gera o arquivo; ajuste usuário/banco se necessário):
+pg_dump -U manomelancias_user -h localhost --no-owner manomelancias > meu-banco.sql
+
+# Envie para o servidor (scp) e, lá, suba só o banco e importe:
+docker compose up -d db
+docker compose exec -T db psql -U manomelancias_user manomelancias < meu-banco.sql
+docker compose up -d --build
+```
+
+O dump inclui a tabela de controle do Flyway, então o backend entende que as migrações já foram aplicadas e segue de onde parou. Use isso só com dados que podem ir para produção.

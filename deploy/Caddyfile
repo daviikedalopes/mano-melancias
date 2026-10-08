@@ -1,0 +1,28 @@
+# HTTPS automático (Let's Encrypt) para o domínio do .env.
+# Com DOMINIO=localhost o Caddy usa um certificado interno (bom para testar).
+{$DOMINIO} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "same-origin"
+		-Server
+	}
+
+	# /api/auth/login -> backend recebe /auth/login (o prefixo é removido)
+	handle_path /api/* {
+		reverse_proxy api:8080
+	}
+
+	# Arquivos da pasta frontend/ que não fazem parte do site
+	@internos path /Dockerfile /.dockerignore /nginx.conf.template /*.iml
+	handle @internos {
+		respond 404
+	}
+
+	handle {
+		root * /srv/frontend
+		file_server
+	}
+}
