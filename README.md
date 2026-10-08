@@ -35,7 +35,7 @@ O fluxo central do sistema é a **venda**: um carregamento de melancia comprado 
 | Banco de dados | PostgreSQL, migrações versionadas com Flyway |
 | Geração de PDF | OpenPDF |
 | Frontend | HTML + CSS + JavaScript puro, sem framework e sem build step |
-| Hospedagem prevista | Railway (backend e frontend) + Supabase (Postgres) — ver [DEPLOY.md](DEPLOY.md) |
+| Hospedagem prevista | VPS com Docker Compose (PostgreSQL + API + Caddy) — ver [DEPLOY.md](DEPLOY.md) |
 
 O frontend é uma página HTML por tela (sem roteamento client-side); cada uma carrega seu próprio script e alguns módulos JS compartilhados. Toda comunicação com o backend é via `fetch`, enviando o JWT no header `Authorization: Bearer <token>`.
 
@@ -217,8 +217,8 @@ cd frontend
 npx serve -l 5500
 ```
 
-Ajuste `assets/js/config.js` (`API_BASE_URL`) se o backend não estiver em `http://localhost:8080`.
+O `assets/js/config.js` escolhe a API sozinho: em `localhost` usa `http://localhost:8080`; em qualquer outro domínio usa a mesma origem, em `/api` (o Caddy repassa ao backend). Ajuste só se o backend local não estiver na porta 8080.
 
 ## Deploy
 
-Passo a passo completo (Supabase + Railway) em [DEPLOY.md](DEPLOY.md).
+Passo a passo completo (VPS com Docker Compose) em [DEPLOY.md](DEPLOY.md).

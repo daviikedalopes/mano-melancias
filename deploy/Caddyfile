@@ -16,7 +16,7 @@
 	}
 
 	# Arquivos da pasta frontend/ que não fazem parte do site
-	@internos path /Dockerfile /.dockerignore /nginx.conf.template /*.iml
+	@internos path /*.iml
 	handle @internos {
 		respond 404
 	}
