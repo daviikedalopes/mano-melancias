@@ -166,15 +166,24 @@ Páginas: `login`, `index` (painel), `vendas`, `venda-form`, `venda-detalhe`, `c
 
 ## Banco de dados
 
-PostgreSQL, com 10 migrações Flyway (`api/src/main/resources/db/migration`):
+PostgreSQL, com 4 migrações Flyway (`api/src/main/resources/db/migration`), uma por tabela:
 
-| Migração | O que faz |
+| Migração | Tabela |
 |---|---|
-| V1–V6 | Criação das tabelas cliente, produtor, motorista, veiculo, usuario, venda |
-| V7 | Adiciona `ativo` em veiculo (padroniza o soft-delete) |
-| V8 | Adiciona `ativo` em usuario |
-| V9 | Remove a sequence de numeração de venda (substituída pela lógica de menor lacuna livre) |
-| V10 | Motorista e veículo deixam de ser tabelas: os dados existentes são copiados para novas colunas em `venda` (`motorista_nome`, `motorista_cpf`, `veiculo_placa`, `veiculo_cidade`) antes de as tabelas `motorista` e `veiculo` serem removidas — nenhum histórico é perdido |
+| V1 | `cliente` |
+| V2 | `produtor` |
+| V3 | `usuario` |
+| V4 | `venda` — inclui direto os dados de motorista (`motorista_nome`, `motorista_cpf`) e veículo (`veiculo_placa`, `veiculo_cidade`), que não são cadastros próprios |
+
+Para mudar o banco no futuro, crie um arquivo novo (`V5__descricao.sql`); nunca edite uma migração já aplicada.
+
+**Banco que já existia antes da simplificação das migrações** (ex.: o banco local de desenvolvimento, criado quando eram 10 migrações): o schema é idêntico, mas o histórico do Flyway não bate mais. Alinhe uma única vez, sem perder dados:
+
+```sql
+DROP TABLE flyway_schema_history;
+```
+
+e suba a API uma vez com `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` e `SPRING_FLYWAY_BASELINE_VERSION=4` (variáveis de ambiente). O Flyway registra o banco como já estando na V4 e não roda nada; depois pode remover as variáveis.
 
 ## Casos de uso principais
 

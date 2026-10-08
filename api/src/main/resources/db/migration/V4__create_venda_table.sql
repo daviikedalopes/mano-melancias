@@ -1,13 +1,15 @@
-CREATE SEQUENCE venda_numero_seq START WITH 1 INCREMENT BY 1;
-
+-- O número da venda é calculado preenchendo lacunas (menor número livre),
+-- por isso não há sequence.
 CREATE TABLE venda (
     id UUID PRIMARY KEY,
     numero INTEGER NOT NULL UNIQUE,
     data_venda DATE NOT NULL,
     cliente_id UUID NOT NULL REFERENCES cliente (id),
     produtor_id UUID NOT NULL REFERENCES produtor (id),
-    motorista_id UUID NOT NULL REFERENCES motorista (id),
-    veiculo_id UUID NOT NULL REFERENCES veiculo (id),
+    motorista_nome VARCHAR(255) NOT NULL,
+    motorista_cpf VARCHAR(11),
+    veiculo_placa VARCHAR(8) NOT NULL,
+    veiculo_cidade VARCHAR(255) NOT NULL,
     peso_bruto NUMERIC(10,2) NOT NULL,
     desc_tara NUMERIC(10,2) NOT NULL,
     desc_palha NUMERIC(10,2) NOT NULL DEFAULT 0,
@@ -32,5 +34,4 @@ CREATE TABLE venda (
 CREATE INDEX idx_venda_data_venda ON venda (data_venda);
 CREATE INDEX idx_venda_cliente ON venda (cliente_id);
 CREATE INDEX idx_venda_produtor ON venda (produtor_id);
-CREATE INDEX idx_venda_motorista ON venda (motorista_id);
 CREATE INDEX idx_venda_status_pagamento ON venda (status_pagamento);

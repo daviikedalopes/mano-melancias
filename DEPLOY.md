@@ -31,8 +31,8 @@ Depois: agendar o backup (seção 5) e conferir (seção 7). Os detalhes de cada
 ## Como funciona o banco de dados e as migrações
 
 - **Você não cria tabelas.** O container `db` cria um banco **vazio** (`manomelancias`) na primeira vez que sobe.
-- Quando o backend inicia, o **Flyway** olha a pasta `api/src/main/resources/db/migration/` (arquivos `V1`, `V2`, … `V10`) e roda, em ordem, os que ainda não foram aplicados. Ele anota o que já rodou na tabela `flyway_schema_history`. No primeiro boot roda tudo; nos próximos, só as migrações **novas**.
-- Para mudar o banco no futuro, crie um arquivo novo (`V11__descricao.sql`), faça `git pull` no servidor e `docker compose up -d --build`. **Nunca edite** uma migração que já foi aplicada.
+- Quando o backend inicia, o **Flyway** olha a pasta `api/src/main/resources/db/migration/` (arquivos `V1` a `V4`, um por tabela) e roda, em ordem, os que ainda não foram aplicados. Ele anota o que já rodou na tabela `flyway_schema_history`. No primeiro boot roda tudo; nos próximos, só as migrações **novas**.
+- Para mudar o banco no futuro, crie um arquivo novo (`V5__descricao.sql`), faça `git pull` no servidor e `docker compose up -d --build`. **Nunca edite** uma migração que já foi aplicada.
 - O banco do seu computador **não vai junto**: são bancos separados. O do servidor nasce vazio e sem usuários (por isso o `criar-admin.sh`). Para levar dados locais, veja "Levar o banco local".
 - Os dados ficam no volume Docker `pgdata`: sobrevivem a reinício, a `docker compose down` e a atualizações. Só somem com `docker compose down -v`, **nunca use `-v` em produção**.
 
@@ -79,7 +79,7 @@ crontab -e   # adicione:  0 3 * * * /root/mano-melancias/deploy/backup.sh >> /va
 
 O script grava um `.sql.gz` por dia em `deploy/backups/` (guarda 14 dias). Para ter uma cópia **fora do servidor**, configure o [rclone](https://rclone.org) com um bucket gratuito (Cloudflare R2 ou Backblaze B2) e defina `BACKUP_RCLONE_REMOTE` no `.env`.
 
-Restaurar (num banco vazio): o comando está no cabeçalho do `backup.sh`. Já testado: um dump restaurado num banco descartável voltou com os mesmos usuários e as 10 migrações.
+Restaurar (num banco vazio): o comando está no cabeçalho do `backup.sh`. Já testado: um dump restaurado num banco descartável voltou com os mesmos usuários e as 4 migrações.
 
 ## 6. Atualizar o sistema
 
@@ -110,16 +110,17 @@ Dica: cadastre o domínio num monitor gratuito (UptimeRobot) para ser avisado se
 
 ## Levar o banco local (opcional)
 
-Só se você quiser os dados que já tem no seu computador. Faça **antes** de subir a API, com o banco do servidor ainda vazio:
+Só se você quiser os dados que já tem no seu computador. Leve **só os dados**: o servidor cria as tabelas sozinho (Flyway) e o histórico do Flyway do seu banco local não deve ir junto.
 
 ```bash
-# No seu computador (gera o arquivo; ajuste usuário/banco se necessário):
-pg_dump -U manomelancias_user -h localhost --no-owner manomelancias > meu-banco.sql
+# 1. No seu computador (gera o arquivo; ajuste usuário/banco se necessário):
+pg_dump -U manomelancias_user -h localhost --data-only --no-owner --exclude-table=flyway_schema_history manomelancias > dados.sql
 
-# Envie para o servidor (scp) e, lá, suba só o banco e importe:
-docker compose up -d db
-docker compose exec -T db psql -U manomelancias_user manomelancias < meu-banco.sql
-docker compose up -d --build
+# 2. Envie dados.sql para o servidor (scp). Lá, suba o sistema normalmente
+#    (docker compose up -d --build) e espere a API iniciar: ela cria as tabelas.
+
+# 3. Importe os dados (com as tabelas vazias):
+docker compose exec -T db psql -U manomelancias_user manomelancias < dados.sql
 ```
 
-O dump inclui a tabela de controle do Flyway, então o backend entende que as migrações já foram aplicadas. Use só com dados que podem ir para produção.
+Use isso só com dados que podem ir para produção. Depois de importar, crie o administrador com `bash criar-admin.sh` apenas se o seu usuário local não tiver vindo junto.
