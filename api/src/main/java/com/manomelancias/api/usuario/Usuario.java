@@ -49,6 +49,11 @@ public class Usuario {
     @Builder.Default
     private Boolean ativo = true;
 
+    // false até a pessoa clicar no link enviado por e-mail (prova que a caixa existe)
+    @Column(name = "email_confirmado", nullable = false)
+    @Builder.Default
+    private Boolean emailConfirmado = true;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

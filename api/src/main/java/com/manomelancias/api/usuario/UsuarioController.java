@@ -1,6 +1,10 @@
 package com.manomelancias.api.usuario;
 
+import com.manomelancias.api.usuario.confirmacao.ConfirmacaoEmailService;
+import com.manomelancias.api.usuario.dto.ConfirmarEmailRequest;
+import com.manomelancias.api.usuario.dto.EnvioEmailResponse;
 import com.manomelancias.api.usuario.dto.LoginRequest;
+import com.manomelancias.api.usuario.dto.ReenviarConfirmacaoRequest;
 import com.manomelancias.api.usuario.dto.LoginResponse;
 import com.manomelancias.api.usuario.dto.UsuarioRequest;
 import com.manomelancias.api.usuario.dto.UsuarioResponse;
@@ -24,6 +28,7 @@ import java.util.stream.Collectors;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final ConfirmacaoEmailService confirmacaoEmailService;
 
     @PostMapping("/auth/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
@@ -31,12 +36,25 @@ public class UsuarioController {
         return new LoginResponse(token);
     }
 
+    @PostMapping("/auth/confirmar-email")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void confirmarEmail(@Valid @RequestBody ConfirmarEmailRequest request) {
+        confirmacaoEmailService.confirmar(request.getToken());
+    }
+
+    // Resposta sempre igual (204), exista ou não o e-mail, para não revelar quem tem conta.
+    @PostMapping("/auth/reenviar-confirmacao")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void reenviarConfirmacao(@Valid @RequestBody ReenviarConfirmacaoRequest request) {
+        confirmacaoEmailService.reenviarPorEmail(request.getEmail());
+    }
+
     @PostMapping("/usuarios")
     @ResponseStatus(HttpStatus.CREATED)
     public UsuarioResponse criar(@Valid @RequestBody UsuarioRequest request) {
-        Usuario usuario = usuarioService.criarUsuario(
+        UsuarioCriado criado = usuarioService.criarUsuario(
                 request.getNome(), request.getEmail(), request.getSenha(), request.getPapel());
-        return UsuarioResponse.from(usuario);
+        return UsuarioResponse.from(criado.usuario(), criado.emailEnviado());
     }
 
     @GetMapping("/usuarios")
@@ -50,6 +68,11 @@ public class UsuarioController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void excluir(@PathVariable UUID id) {
         usuarioService.excluirUsuario(id);
+    }
+
+    @PostMapping("/usuarios/{id}/reenviar-confirmacao")
+    public EnvioEmailResponse reenviarConfirmacaoAdmin(@PathVariable UUID id) {
+        return new EnvioEmailResponse(confirmacaoEmailService.reenviarPorId(id));
     }
 
     @PostMapping("/usuarios/{id}/inativar")

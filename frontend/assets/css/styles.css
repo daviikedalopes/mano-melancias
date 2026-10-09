@@ -668,6 +668,26 @@ table.table tbody tr.is-clickable { cursor: pointer; }
   font-weight: 600;
   margin-bottom: 16px;
 }
+.login-ok {
+  background: var(--rind-100);
+  color: var(--rind-700);
+  border-radius: var(--radius-control);
+  padding: 11px 13px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.login-link {
+  display: block;
+  margin: 14px auto 0;
+  background: none;
+  border: 0;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
 
 /* ============================================================
    Venda ticket (the one deliberate "hero" moment)

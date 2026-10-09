@@ -36,6 +36,16 @@ services:
       # Frontend e API ficam na mesma origem, então o CORS nem chega a ser usado;
       # o valor só precisa existir.
       CORS_ALLOWED_ORIGINS: https://${DOMINIO:?defina DOMINIO no .env}
+      # Link do e-mail de confirmação de cadastro
+      APP_PUBLIC_URL: https://${DOMINIO}
+      # Servidor SMTP que envia o e-mail de confirmação (ver .env.example). Vazio = o e-mail não é
+      # enviado e o link aparece no log da API (use só para o primeiro acesso, nunca em produção).
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_AUTH: ${MAIL_AUTH:-true}
+      MAIL_FROM: ${MAIL_FROM:-}
     # Sem "ports": só o Caddy fala com a API.
 
   caddy:

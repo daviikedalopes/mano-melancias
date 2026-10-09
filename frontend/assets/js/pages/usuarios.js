@@ -1,4 +1,5 @@
 (function () {
+  const SEM_SMTP = 'O servidor de e-mail NÃO está configurado: nenhum e-mail foi enviado. O link de confirmação está no log da API.';
   const els = {};
   const qs = (id) => document.getElementById(id);
 
@@ -25,6 +26,7 @@
         <td class="table__primary">
           ${window.escapeHtml(u.nome)}
           ${u.ativo ? '' : '<span class="badge badge--inativo" style="margin-left:8px;">Inativo</span>'}
+          ${u.emailConfirmado ? '' : '<span class="badge badge--pendente" style="margin-left:8px;">Aguardando confirmação</span>'}
         </td>
         <td>${window.escapeHtml(u.email)}</td>
         <td><span class="badge badge--${u.papel.toLowerCase()}">${window.Fmt.papelLabel(u.papel)}</span></td>
@@ -39,6 +41,9 @@
     els.tbody.querySelectorAll('[data-reativar]').forEach((btn) => {
       btn.addEventListener('click', () => reativar(btn.dataset.reativar));
     });
+    els.tbody.querySelectorAll('[data-reenviar]').forEach((btn) => {
+      btn.addEventListener('click', () => reenviar(btn.dataset.reenviar));
+    });
     els.tbody.querySelectorAll('[data-excluir]').forEach((btn) => {
       btn.addEventListener('click', () => excluir(btn.dataset.excluir));
     });
@@ -47,11 +52,24 @@
   // Contas ADMIN não podem ser excluídas/inativadas por aqui — a API também
   // recusa, mas nem mostramos os botões para evitar o erro previsível.
   function actionsFor(u) {
-    if (u.papel !== 'OPERADOR') return '';
+    const reenviarBtn = u.emailConfirmado
+      ? ''
+      : `<button class="btn btn-secondary btn-sm" type="button" data-reenviar="${u.id}">Reenviar e-mail</button>`;
+    if (u.papel !== 'OPERADOR') return reenviarBtn;
     const toggle = u.ativo
       ? `<button class="btn btn-ghost btn-sm" type="button" data-inativar="${u.id}">Inativar</button>`
       : `<button class="btn btn-secondary btn-sm" type="button" data-reativar="${u.id}">Reativar</button>`;
-    return `${toggle}<button class="btn btn-danger btn-sm" type="button" data-excluir="${u.id}">Excluir</button>`;
+    return `${reenviarBtn}${toggle}<button class="btn btn-danger btn-sm" type="button" data-excluir="${u.id}">Excluir</button>`;
+  }
+
+  async function reenviar(id) {
+    try {
+      const res = await window.Api.post('/usuarios/' + id + '/reenviar-confirmacao');
+      if (res && res.emailEnviado === false) window.Toast.info(SEM_SMTP);
+      else window.Toast.success('E-mail de confirmação reenviado.');
+    } catch (err) {
+      window.Toast.error(err.message || 'Não foi possível reenviar o e-mail.');
+    }
   }
 
   async function inativar(id) {
@@ -137,8 +155,10 @@
     els.submitBtn.disabled = true;
     els.submitBtn.textContent = 'Criando...';
     try {
-      await window.Api.post('/usuarios', payload);
-      window.Toast.success('Usuário criado.');
+      const res = await window.Api.post('/usuarios', payload);
+      // emailEnviado === false: o servidor não tem SMTP configurado, então nada saiu
+      if (res && res.emailEnviado === false) window.Toast.info('Usuário criado. ' + SEM_SMTP);
+      else window.Toast.success('Usuário criado. Enviamos um e-mail de confirmação para ' + payload.email + '.');
       closeModal();
       loadList();
     } catch (err) {

@@ -26,7 +26,16 @@ DOMINIO=$DOMINIO
 POSTGRES_PASSWORD=$(openssl rand -hex 24)
 JWT_SECRET=$(openssl rand -hex 48)
 JWT_EXPIRATION_MINUTES=480
+
+# E-mail de confirmação de cadastro (SMTP). Preencha antes de subir; veja o DEPLOY.md.
+MAIL_HOST=
+MAIL_PORT=587
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_FROM=
 EOF
 chmod 600 .env
 echo ".env criado para $DOMINIO (segredos aleatórios, permissão 600)."
-echo "Próximo passo: docker compose up -d --build"
+echo "Antes de subir, preencha as linhas MAIL_* do .env (servidor SMTP para o e-mail de confirmação):"
+echo "  nano .env"
+echo "Depois: docker compose up -d --build"

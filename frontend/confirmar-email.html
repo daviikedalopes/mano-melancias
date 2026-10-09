@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' http://localhost:8080; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmar e-mail · Mano Melancias</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <div class="login-screen">
+    <div class="login-card">
+      <div class="login-card__brand">
+        <img src="assets/img/logo_mano_melancias.png" alt="Mano Melancias">
+        <h1>Mano Melancias</h1>
+        <p>Confirmação de e-mail</p>
+      </div>
+
+      <div class="login-ok" id="confirm-ok" hidden>E-mail confirmado! Sua conta está ativa.</div>
+      <div class="login-error" id="confirm-error" hidden></div>
+      <p id="confirm-loading" style="text-align:center; color:var(--ink-soft);">Confirmando seu e-mail…</p>
+
+      <a href="login.html" class="btn btn-primary btn-block" id="confirm-login" style="margin-top:6px;" hidden>Ir para o login</a>
+    </div>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/pages/confirmar-email.js"></script>
+</body>
+</html>

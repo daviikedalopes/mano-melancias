@@ -22,6 +22,7 @@ git clone https://github.com/daviikedalopes/mano-melancias.git
 cd mano-melancias/deploy
 bash setup-servidor.sh                 # Docker, swap e firewall
 bash gerar-env.sh SEU_DOMINIO          # cria o .env com segredos aleatórios
+nano .env                              # preencha as linhas MAIL_* (SMTP, ver seção E-mail)
 docker compose up -d --build           # sobe tudo (alguns minutos na 1ª vez)
 bash criar-admin.sh                    # cria o primeiro administrador
 ```
@@ -31,10 +32,24 @@ Depois: agendar o backup (seção 5) e conferir (seção 7). Os detalhes de cada
 ## Como funciona o banco de dados e as migrações
 
 - **Você não cria tabelas.** O container `db` cria um banco **vazio** (`manomelancias`) na primeira vez que sobe.
-- Quando o backend inicia, o **Flyway** olha a pasta `api/src/main/resources/db/migration/` (arquivos `V1` a `V4`, um por tabela) e roda, em ordem, os que ainda não foram aplicados. Ele anota o que já rodou na tabela `flyway_schema_history`. No primeiro boot roda tudo; nos próximos, só as migrações **novas**.
-- Para mudar o banco no futuro, crie um arquivo novo (`V5__descricao.sql`), faça `git pull` no servidor e `docker compose up -d --build`. **Nunca edite** uma migração que já foi aplicada.
+- Quando o backend inicia, o **Flyway** olha a pasta `api/src/main/resources/db/migration/` (arquivos `V1` a `V5`) e roda, em ordem, os que ainda não foram aplicados. Ele anota o que já rodou na tabela `flyway_schema_history`. No primeiro boot roda tudo; nos próximos, só as migrações **novas**.
+- Para mudar o banco no futuro, crie um arquivo novo (`V6__descricao.sql`), faça `git pull` no servidor e `docker compose up -d --build`. **Nunca edite** uma migração que já foi aplicada.
 - O banco do seu computador **não vai junto**: são bancos separados. O do servidor nasce vazio e sem usuários (por isso o `criar-admin.sh`). Para levar dados locais, veja "Levar o banco local".
 - Os dados ficam no volume Docker `pgdata`: sobrevivem a reinício, a `docker compose down` e a atualizações. Só somem com `docker compose down -v`, **nunca use `-v` em produção**.
+
+## E-mail: confirmação de cadastro (configure antes de subir)
+
+Todo usuário novo, inclusive o administrador, recebe um link por e-mail e só entra depois de clicar nele. Isso é o que garante que o e-mail **existe de verdade**. Para o sistema enviar e-mails é preciso um servidor **SMTP**; as opções mais simples:
+
+| Serviço | Custo | Como pegar os dados |
+|---|---|---|
+| **Brevo** (brevo.com) | grátis, 300 e-mails/dia | Conta → SMTP e API → *SMTP*: host `smtp-relay.brevo.com`, porta `587`, login e a chave SMTP gerada ali |
+| **Gmail** | grátis | Conta Google com verificação em 2 etapas → *Senhas de app*: host `smtp.gmail.com`, porta `587`, login = seu Gmail, senha = a senha de app |
+| Resend, Mailgun, etc. | planos grátis | Veja a seção SMTP do serviço |
+
+Preencha no `.env` (o `gerar-env.sh` já cria as linhas vazias): `MAIL_HOST`, `MAIL_PORT` (587), `MAIL_USERNAME`, `MAIL_PASSWORD` e `MAIL_FROM` (o remetente que aparece no e-mail; no Brevo e no Resend ele precisa estar verificado no painel deles; no Gmail use o próprio Gmail).
+
+> Sem `MAIL_HOST` o e-mail **não é enviado**: o link de confirmação aparece em `docker compose logs api`. Serve só para o primeiro acesso de emergência; em uso normal, configure o SMTP.
 
 ## 1. Servidor (VPS Hostinger)
 
@@ -68,7 +83,7 @@ O `gerar-env.sh` cria o `.env` com a senha do banco e o segredo do login **aleat
 bash criar-admin.sh
 ```
 
-Pergunta nome, e-mail e senha (8+ caracteres, com maiúscula, número e caractere especial), gera o hash BCrypt num container descartável e insere o usuário no banco. Depois entre no sistema e crie os demais usuários pela tela **Usuários**.
+Pergunta nome, e-mail e senha (8+ caracteres, com maiúscula, número e caractere especial), gera o hash BCrypt num container descartável e insere o administrador no banco **como não confirmado**; em seguida pede à API o envio do link de confirmação. Abra o e-mail, clique no link e só então entre no sistema. Depois crie os demais usuários pela tela **Usuários** (cada um também recebe o link por e-mail).
 
 ## 5. Backup (não pule)
 
@@ -106,6 +121,8 @@ Dica: cadastre o domínio num monitor gratuito (UptimeRobot) para ser avisado se
 | Navegador avisa "conexão não segura" / Caddy não emite certificado | Domínio ainda não aponta para o IP, ou portas 80/443 bloqueadas (ufw ou firewall do painel). Veja `docker compose logs caddy` |
 | `502 Bad Gateway` logo após subir | A API ainda está iniciando (1–2 min). Veja `docker compose logs -f api` |
 | API reinicia em loop com `password authentication failed` | O `.env` foi trocado depois do banco ser criado. Restaure o `.env` antigo, ou, só se não houver dados, `docker compose down -v` e suba de novo |
+| "Confirme seu e-mail antes de entrar" e o e-mail não chegou | Veja o spam; confira as linhas `MAIL_*` do `.env` (e `docker compose logs api`). Na tela de login use "Não recebi o e-mail de confirmação: reenviar" |
+| Administrador criado com e-mail errado (não consegue confirmar) | Apague e recrie: `docker compose exec db psql -U manomelancias_user manomelancias -c "DELETE FROM usuario WHERE email='errado@exemplo.com'"` e rode `bash criar-admin.sh` de novo |
 | `Could not resolve placeholder 'JWT_SECRET'` | `.env` ausente ou vazio: rode `bash gerar-env.sh SEU_DOMINIO` |
 
 ## Levar o banco local (opcional)

@@ -65,6 +65,7 @@ Diferente de cliente e produtor, motorista e veículo **não têm tela própria 
 - Login por e-mail + senha (hash BCrypt), retorna um JWT válido por `app.jwt.expiration-minutes` (padrão 480 min = 8h).
 - **Senha**: mínimo 8 caracteres, 1 letra maiúscula, 1 número, 1 caractere especial (validador `SenhaForte`); máximo 72 caracteres (limite de que o BCrypt trunca silenciosamente bytes além disso).
 - **E-mail**: além do formato (exige domínio com TLD), o backend confirma que o **domínio existe de verdade** consultando o DNS (registro MX, ou A/AAAA como fallback) — validador `ValidEmail`. Rejeita algo como `admin@empresa` (sem TLD) e também domínios inventados.
+- **Confirmação de e-mail**: validar o domínio não prova que a caixa existe. Por isso todo usuário novo (operador **ou administrador**) nasce com `email_confirmado = false`, recebe por e-mail um link (token assinado, válido por 48 h, com chave derivada diferente da do login) e só consegue entrar depois de clicar nele. Se o envio falhar, a criação do usuário é desfeita (503). O administrador pode reenviar o link pela tela de Usuários; quem não recebeu pode pedir de novo na tela de login. Exige um servidor SMTP (`MAIL_*`, ver [DEPLOY.md](DEPLOY.md)); sem `MAIL_HOST` o e-mail não sai e o link vai para o log da API (útil só em desenvolvimento).
 - **Rate limiting de login**: 5 tentativas com senha errada para o mesmo e-mail bloqueiam esse e-mail por 15 minutos (`LoginRateLimiter`, contador em memória).
 - **Contas ADMIN nunca podem ser inativadas ou excluídas** — só contas `OPERADOR` podem (regra em `UsuarioService.validarOperador`). Isso evita que alguém remova o próprio acesso de administrador do sistema.
 - Usuário inativo **não consegue mais logar** (checagem em `autenticar`, depois de validar a senha).
@@ -166,7 +167,7 @@ Páginas: `login`, `index` (painel), `vendas`, `venda-form`, `venda-detalhe`, `c
 
 ## Banco de dados
 
-PostgreSQL, com 4 migrações Flyway (`api/src/main/resources/db/migration`), uma por tabela:
+PostgreSQL, com 5 migrações Flyway (`api/src/main/resources/db/migration`):
 
 | Migração | Tabela |
 |---|---|
@@ -174,8 +175,9 @@ PostgreSQL, com 4 migrações Flyway (`api/src/main/resources/db/migration`), um
 | V2 | `produtor` |
 | V3 | `usuario` |
 | V4 | `venda` — inclui direto os dados de motorista (`motorista_nome`, `motorista_cpf`) e veículo (`veiculo_placa`, `veiculo_cidade`), que não são cadastros próprios |
+| V5 | `usuario.email_confirmado` — confirmação de e-mail no cadastro (usuários que já existiam ficam confirmados) |
 
-Para mudar o banco no futuro, crie um arquivo novo (`V5__descricao.sql`); nunca edite uma migração já aplicada.
+Para mudar o banco no futuro, crie um arquivo novo (`V6__descricao.sql`); nunca edite uma migração já aplicada.
 
 **Banco que já existia antes da simplificação das migrações** (ex.: o banco local de desenvolvimento, criado quando eram 10 migrações): o schema é idêntico, mas o histórico do Flyway não bate mais. Alinhe uma única vez, sem perder dados:
 
@@ -183,7 +185,7 @@ Para mudar o banco no futuro, crie um arquivo novo (`V5__descricao.sql`); nunca 
 DROP TABLE flyway_schema_history;
 ```
 
-e suba a API uma vez com `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` e `SPRING_FLYWAY_BASELINE_VERSION=4` (variáveis de ambiente). O Flyway registra o banco como já estando na V4 e não roda nada; depois pode remover as variáveis.
+e suba a API uma vez com `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` e `SPRING_FLYWAY_BASELINE_VERSION=4` (variáveis de ambiente). O Flyway registra o banco como já estando na V4 e roda só a V5 (que adiciona `email_confirmado`, mantendo os usuários atuais como confirmados); depois pode remover as variáveis.
 
 ## Casos de uso principais
 
