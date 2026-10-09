@@ -230,6 +230,11 @@ npx serve -l 5500
 
 O `assets/js/config.js` escolhe a API sozinho: em `localhost` usa `http://localhost:8080`; em qualquer outro domínio usa a mesma origem, em `/api` (o Caddy repassa ao backend). Ajuste só se o backend local não estiver na porta 8080.
 
+**E-mail de confirmação no ambiente local.** Todo usuário novo recebe um link por e-mail. No `application.properties` local (ignorado pelo git) configure:
+
+- `spring.mail.host`, `spring.mail.port`, `spring.mail.username`, `spring.mail.password` e `app.mail.from` (ex.: Gmail com senha de app; ver [DEPLOY.md](DEPLOY.md)). Sem eles o e-mail **não é enviado**: o link aparece no console da API e a tela avisa.
+- `app.public-url`: o endereço onde o seu frontend está sendo servido, senão o link do e-mail abre uma página inexistente. O padrão é `http://localhost:5500` (o do `npx serve -l 5500`); se você abre o frontend pelo servidor do IntelliJ, use `http://localhost:63342/NOME_DO_PROJETO/frontend`.
+
 ## Deploy
 
 Passo a passo completo (VPS com Docker Compose) em [DEPLOY.md](DEPLOY.md).
