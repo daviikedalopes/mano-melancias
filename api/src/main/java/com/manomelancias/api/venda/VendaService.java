@@ -132,6 +132,7 @@ public class VendaService {
         venda.setDescTara(dto.getDescTara());
         venda.setDescPalha(descPalha);
         venda.setPesoLiquido(pesoLiquido);
+        venda.setPesoLiquidoChegada(dto.getPesoLiquidoChegada());
         venda.setTotalFrutas(dto.getTotalFrutas());
         venda.setMediaPeso(mediaPeso);
         venda.setPrecoKg(dto.getPrecoKg());

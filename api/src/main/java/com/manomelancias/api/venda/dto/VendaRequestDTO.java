@@ -5,6 +5,7 @@ import com.manomelancias.api.produtor.dto.ProdutorRequestDTO;
 import com.manomelancias.api.venda.StatusPagamento;
 import com.manomelancias.api.venda.TipoFrete;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -63,6 +64,11 @@ public class VendaRequestDTO {
 
     @PositiveOrZero
     private BigDecimal descPalha = BigDecimal.ZERO;
+
+    // Peso líquido medido na chegada ao cliente: campo livre e opcional, sem regra de negócio.
+    @PositiveOrZero(message = "peso líquido na chegada não pode ser negativo")
+    @Digits(integer = 8, fraction = 2, message = "peso líquido na chegada inválido (máx. 8 inteiros e 2 decimais)")
+    private BigDecimal pesoLiquidoChegada;
 
     @NotNull(message = "total de frutas é obrigatório")
     @Positive

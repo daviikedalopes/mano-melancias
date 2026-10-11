@@ -88,6 +88,7 @@ Uma venda liga cliente, produtor, motorista e veículo, e registra pesagem, pre�
 | Cálculo | Fórmula |
 |---|---|
 | Peso líquido | peso bruto − desconto de tara − desconto de palha |
+| Peso líquido na chegada | campo **livre e opcional**, digitado à mão (pesagem no cliente, depois da viagem: parte da carga pode ter sido perdida). Só é registrado e exibido (detalhe, edição e recibo em PDF): **não entra em nenhum cálculo**, não é comparado com o peso de saída e não afeta valores, frete nem saldo |
 | Valor da mercadoria | peso líquido × preço/kg |
 | Valor do frete | peso líquido × preço do frete/kg (se `POR_KG`) **ou** o valor negociado informado (se `NEGOCIADO`) |
 | Restante a pagar | valor da mercadoria − valor do frete |
@@ -167,7 +168,7 @@ Páginas: `login`, `index` (painel), `vendas`, `venda-form`, `venda-detalhe`, `c
 
 ## Banco de dados
 
-PostgreSQL, com 5 migrações Flyway (`api/src/main/resources/db/migration`):
+PostgreSQL, com 6 migrações Flyway (`api/src/main/resources/db/migration`):
 
 | Migração | Tabela |
 |---|---|
@@ -176,8 +177,9 @@ PostgreSQL, com 5 migrações Flyway (`api/src/main/resources/db/migration`):
 | V3 | `usuario` |
 | V4 | `venda` — inclui direto os dados de motorista (`motorista_nome`, `motorista_cpf`) e veículo (`veiculo_placa`, `veiculo_cidade`), que não são cadastros próprios |
 | V5 | `usuario.email_confirmado` — confirmação de e-mail no cadastro (usuários que já existiam ficam confirmados) |
+| V6 | `venda.peso_liquido_chegada` — peso líquido medido na chegada ao cliente (opcional, informativo) |
 
-Para mudar o banco no futuro, crie um arquivo novo (`V6__descricao.sql`); nunca edite uma migração já aplicada.
+Para mudar o banco no futuro, crie um arquivo novo (`V7__descricao.sql`); nunca edite uma migração já aplicada.
 
 **Banco que já existia antes da simplificação das migrações** (ex.: o banco local de desenvolvimento, criado quando eram 10 migrações): o schema é idêntico, mas o histórico do Flyway não bate mais. Alinhe uma única vez, sem perder dados:
 

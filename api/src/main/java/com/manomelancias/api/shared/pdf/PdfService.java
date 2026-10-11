@@ -205,6 +205,10 @@ public class PdfService {
         table.addCell(celula("Média por fruta", kg(venda.getMediaPeso())));
         table.addCell(celula("Desc. palha", kg(venda.getDescPalha())));
         table.addCell(celula("Peso líquido", kg(venda.getPesoLiquido())));
+        if (venda.getPesoLiquidoChegada() != null) {
+            table.addCell(celula("Peso líquido na chegada", kg(venda.getPesoLiquidoChegada())));
+            table.addCell(celula("", ""));
+        }
         return table;
     }
 

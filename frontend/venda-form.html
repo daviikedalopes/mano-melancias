@@ -102,6 +102,12 @@
                   <label>Peso líquido</label>
                   <div class="readonly-field num" id="calc-peso-liquido">0,00 kg</div>
                 </div>
+                <div class="field">
+                  <label for="f-peso-chegada">Peso líquido na chegada <span class="text-faint">(opcional)</span></label>
+                  <div class="input-suffix-wrap"><input class="input" type="number" step="0.01" min="0" id="f-peso-chegada"><span class="input-suffix">kg</span></div>
+                  <span class="hint">Pesagem no cliente, depois da viagem. Campo informativo: não entra em nenhum cálculo.</span>
+                  <span class="error-msg" data-field-error-for="pesoLiquidoChegada" hidden></span>
+                </div>
                 <div class="grid-2">
                   <div class="field">
                     <label for="f-total-frutas">Total de frutas</label>

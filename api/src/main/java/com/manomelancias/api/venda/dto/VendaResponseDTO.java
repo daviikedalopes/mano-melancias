@@ -38,6 +38,7 @@ public class VendaResponseDTO {
     private BigDecimal descTara;
     private BigDecimal descPalha;
     private BigDecimal pesoLiquido;
+    private BigDecimal pesoLiquidoChegada;
     private Integer totalFrutas;
     private BigDecimal mediaPeso;
     private BigDecimal precoKg;
@@ -77,6 +78,7 @@ public class VendaResponseDTO {
                 v.getDescTara(),
                 v.getDescPalha(),
                 v.getPesoLiquido(),
+                v.getPesoLiquidoChegada(),
                 v.getTotalFrutas(),
                 v.getMediaPeso(),
                 v.getPrecoKg(),

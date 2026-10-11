@@ -32,8 +32,8 @@ Depois: agendar o backup (seção 5) e conferir (seção 7). Os detalhes de cada
 ## Como funciona o banco de dados e as migrações
 
 - **Você não cria tabelas.** O container `db` cria um banco **vazio** (`manomelancias`) na primeira vez que sobe.
-- Quando o backend inicia, o **Flyway** olha a pasta `api/src/main/resources/db/migration/` (arquivos `V1` a `V5`) e roda, em ordem, os que ainda não foram aplicados. Ele anota o que já rodou na tabela `flyway_schema_history`. No primeiro boot roda tudo; nos próximos, só as migrações **novas**.
-- Para mudar o banco no futuro, crie um arquivo novo (`V6__descricao.sql`), faça `git pull` no servidor e `docker compose up -d --build`. **Nunca edite** uma migração que já foi aplicada.
+- Quando o backend inicia, o **Flyway** olha a pasta `api/src/main/resources/db/migration/` (arquivos `V1` a `V6`) e roda, em ordem, os que ainda não foram aplicados. Ele anota o que já rodou na tabela `flyway_schema_history`. No primeiro boot roda tudo; nos próximos, só as migrações **novas**.
+- Para mudar o banco no futuro, crie um arquivo novo (`V7__descricao.sql`), faça `git pull` no servidor e `docker compose up -d --build`. **Nunca edite** uma migração que já foi aplicada.
 - O banco do seu computador **não vai junto**: são bancos separados. O do servidor nasce vazio e sem usuários (por isso o `criar-admin.sh`). Para levar dados locais, veja "Levar o banco local".
 - Os dados ficam no volume Docker `pgdata`: sobrevivem a reinício, a `docker compose down` e a atualizações. Só somem com `docker compose down -v`, **nunca use `-v` em produção**.
 

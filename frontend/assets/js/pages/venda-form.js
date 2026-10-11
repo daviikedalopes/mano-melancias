@@ -67,7 +67,7 @@
       'f-preco-frete-kg',
     ].forEach((id) => qs(id).addEventListener('input', () => { recalc(); saveDraft(); }));
 
-    ['f-data', 'f-vencimento', 'f-nf', 'f-status', 'f-obs', 'f-motorista-nome', 'f-motorista-cpf', 'f-veiculo-placa', 'f-veiculo-cidade'].forEach((id) => {
+    ['f-data', 'f-peso-chegada', 'f-vencimento', 'f-nf', 'f-status', 'f-obs', 'f-motorista-nome', 'f-motorista-cpf', 'f-veiculo-placa', 'f-veiculo-cidade'].forEach((id) => {
       qs(id).addEventListener('input', saveDraft);
       qs(id).addEventListener('change', saveDraft);
     });
@@ -98,6 +98,7 @@
         pesoBruto: qs('f-peso-bruto').value,
         descTara: qs('f-desc-tara').value,
         descPalha: qs('f-desc-palha').value,
+        pesoChegada: qs('f-peso-chegada').value,
         totalFrutas: qs('f-total-frutas').value,
         precoKg: qs('f-preco-kg').value,
         tipoFrete: tipoFreteEl ? tipoFreteEl.value : null,
@@ -178,6 +179,7 @@
     qs('f-peso-bruto').value = f.pesoBruto || '';
     qs('f-desc-tara').value = f.descTara || '';
     qs('f-desc-palha').value = f.descPalha || '';
+    qs('f-peso-chegada').value = f.pesoChegada || '';
     qs('f-total-frutas').value = f.totalFrutas || '';
     qs('f-preco-kg').value = f.precoKg || '';
     qs('f-valor-frete').value = f.valorFrete || '';
@@ -300,6 +302,7 @@
       pesoBruto: num(qs('f-peso-bruto').value),
       descTara: num(qs('f-desc-tara').value),
       descPalha: num(qs('f-desc-palha').value) || 0,
+      pesoLiquidoChegada: qs('f-peso-chegada').value === '' ? null : num(qs('f-peso-chegada').value),
       totalFrutas: parseInt(qs('f-total-frutas').value, 10),
       precoKg: num(qs('f-preco-kg').value),
       tipoFrete,
@@ -396,6 +399,7 @@
     qs('f-peso-bruto').value = v.pesoBruto;
     qs('f-desc-tara').value = v.descTara;
     qs('f-desc-palha').value = v.descPalha;
+    qs('f-peso-chegada').value = v.pesoLiquidoChegada != null ? v.pesoLiquidoChegada : '';
     qs('f-total-frutas').value = v.totalFrutas;
     qs('f-preco-kg').value = v.precoKg;
     qs('f-vencimento').value = v.vencimento || '';

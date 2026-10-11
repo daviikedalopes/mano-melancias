@@ -80,6 +80,10 @@ public class Venda {
     @Column(name = "peso_liquido", nullable = false, precision = 10, scale = 2)
     private BigDecimal pesoLiquido;
 
+    // Peso líquido medido na chegada ao cliente. Campo livre (informativo): não entra em nenhum cálculo.
+    @Column(name = "peso_liquido_chegada", precision = 10, scale = 2)
+    private BigDecimal pesoLiquidoChegada;
+
     @Column(name = "total_frutas", nullable = false)
     private Integer totalFrutas;
 

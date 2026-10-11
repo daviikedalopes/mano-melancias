@@ -28,6 +28,7 @@
     setText('t-desc-tara', window.Fmt.weight(v.descTara));
     setText('t-desc-palha', window.Fmt.weight(v.descPalha));
     setText('t-peso-liquido', window.Fmt.weight(v.pesoLiquido));
+    setText('t-peso-chegada', window.Fmt.weight(v.pesoLiquidoChegada));
     setText('t-total-frutas', window.Fmt.integer(v.totalFrutas));
     setText('t-media-peso', window.Fmt.weight(v.mediaPeso));
 
